@@ -47,6 +47,12 @@ const imdbDarkTheme = createTheme({
                     padding: '8px 20px',
                     textTransform: 'none',    // Keep original text casing
                 },
+                textPrimary: {
+                    color: '#ffffff', // Force white text for text buttons
+                    '&:hover': {
+                        backgroundColor: 'rgba(255, 255, 255, 0.08)', // Subtle hover effect
+                    },
+                },
             },
         },
         MuiTextField: {
@@ -95,7 +101,7 @@ const imdbDarkTheme = createTheme({
     },
 });
 
-// Define a custom light theme
+// Define a custom light theme for the app
 const imdbLightTheme = createTheme({
     palette: {
         mode: 'light',                     // Use light mode colors
@@ -150,5 +156,6 @@ const imdbLightTheme = createTheme({
         },
     },
 });
+
 
 export { imdbDarkTheme, imdbLightTheme };

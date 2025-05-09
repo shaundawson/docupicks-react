@@ -1,6 +1,9 @@
+// React and MUI imports
 import { useEffect, useState } from 'react';
 import { CircularProgress, Box, Alert, Grid, Container, CssBaseline } from '@mui/material';
 import axios from 'axios';
+
+// Component imports
 import { Header } from './components/Header';
 import { MovieCard } from './components/MovieCard';
 import { Footer } from './components/Footer';
@@ -9,17 +12,17 @@ import './App.css';
 import { ThemeProvider } from '@mui/material/styles';
 import { imdbDarkTheme, imdbLightTheme } from './theme';
 
+// Configuration constants
+const DEBUG = true; // Enable debug logs
+const MAX_RETRY_PAGES = 4; // Max number of TMDB pages to query
+const DOCUMENTARY_GENRE_ID = 99; // TMDB genre ID for documentaries
+const TOP_MOVIES_LIMIT = 12; // Limit on number of top-rated movies to display
+const FALLBACK_MOVIES = ['13th', 'Citizenfour', 'Icarus', 'Free Solo', 'The Act of Killing']; // Default fallback movies
+const OMDB_DELAY = 500; // Delay between OMDB API calls (ms)
+const MIN_YEAR = 1983; // Minimum release year
+const MAX_YEAR = 2025; // Maximum release year
 
-// Config Constants
-const DEBUG = true;
-const MAX_RETRY_PAGES = 4;
-const DOCUMENTARY_GENRE_ID = 99;
-const TOP_MOVIES_LIMIT = 12;
-const FALLBACK_MOVIES = ['13th', 'Citizenfour', 'Icarus', 'Free Solo', 'The Act of Killing'];
-const OMDB_DELAY = 500;
-const MIN_YEAR = 2020;
-const MAX_YEAR = 2025;
-
+// Interface representing a basic movie from TMDB
 interface TMDBMovie {
   id: number;
   title: string;
@@ -29,12 +32,14 @@ interface TMDBMovie {
   overview: string;
 }
 
+// Extended movie interface with additional OMDB details
 interface MovieDetails extends Movie {
   imdbRating: string;
   Year: string;
   Genre: string;
 }
 
+// Fetch a list of documentary movies from TMDB with filters applied
 async function fetchDocumentaries(page: number): Promise<TMDBMovie[]> {
   try {
     const params = {
@@ -52,6 +57,8 @@ async function fetchDocumentaries(page: number): Promise<TMDBMovie[]> {
     };
 
     const response = await axios.get('https://api.themoviedb.org/3/discover/movie', { params });
+
+    // Simplify the movie objects returned by TMDB
     return response.data.results.map((movie: any) => ({
       id: movie.id,
       title: movie.title,
@@ -66,6 +73,7 @@ async function fetchDocumentaries(page: number): Promise<TMDBMovie[]> {
   }
 }
 
+// Validate a TMDB movie using OMDB data to ensure it's a documentary with a valid IMDb rating
 async function validateMovie(tmdbMovie: TMDBMovie): Promise<MovieDetails | null> {
   try {
     const releaseYear = tmdbMovie.release_date?.split('-')[0] || '';
@@ -83,6 +91,7 @@ async function validateMovie(tmdbMovie: TMDBMovie): Promise<MovieDetails | null>
     const movieYear = parseInt(response.data.Year || releaseYear);
     if (movieYear < MIN_YEAR || movieYear > MAX_YEAR) return null;
 
+    // Check if the movie is a documentary by inspecting genre and descriptions
     const isDocumentary = [
       response.data.Genre?.toLowerCase(),
       response.data.Plot?.toLowerCase(),
@@ -92,6 +101,7 @@ async function validateMovie(tmdbMovie: TMDBMovie): Promise<MovieDetails | null>
     const hasRating = response.data.imdbRating !== 'N/A';
     if (!isDocumentary || !hasRating) return null;
 
+    // Return enriched movie details
     return {
       ...response.data,
       imdbRating: response.data.imdbRating,
@@ -105,12 +115,14 @@ async function validateMovie(tmdbMovie: TMDBMovie): Promise<MovieDetails | null>
   }
 }
 
+// Main logic to load and validate movies from TMDB and OMDB
 async function loadMovies() {
   try {
     let page = 1;
     const movies: TMDBMovie[] = [];
     const uniqueTitles = new Set<string>();
 
+    // Fetch movies across multiple pages until enough valid ones are found or max pages hit
     while (movies.length < TOP_MOVIES_LIMIT && page <= MAX_RETRY_PAGES) {
       const pageResults = await fetchDocumentaries(page);
       const newMovies = pageResults.filter(movie => {
@@ -123,9 +135,10 @@ async function loadMovies() {
       page++;
     }
 
-    const batchSize = 5;
+    const batchSize = 5; // Control batch size for OMDB requests
     const validated: MovieDetails[] = [];
 
+    // Validate movies in batches to avoid OMDB rate limits
     for (let i = 0; i < movies.length; i += batchSize) {
       const batch = movies.slice(i, i + batchSize);
       const results = await Promise.all(batch.map(validateMovie));
@@ -133,6 +146,7 @@ async function loadMovies() {
       await new Promise(resolve => setTimeout(resolve, OMDB_DELAY));
     }
 
+    // If validation fails completely, fall back to predefined movies
     if (validated.length === 0) {
       const fallbackResults = await Promise.all(
         FALLBACK_MOVIES.map(title =>
@@ -145,6 +159,7 @@ async function loadMovies() {
         .slice(0, TOP_MOVIES_LIMIT);
     }
 
+    // Return top-rated documentaries
     return validated
       .sort((a, b) => parseFloat(b.imdbRating) - parseFloat(a.imdbRating))
       .slice(0, TOP_MOVIES_LIMIT);
@@ -154,24 +169,26 @@ async function loadMovies() {
   }
 }
 
+// Root App component
 function App() {
-  const [isDarkTheme, setIsDarkTheme] = useState(true);
-  const [movies, setMovies] = useState<Movie[]>([]);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [isDarkTheme, setIsDarkTheme] = useState(true); // Theme toggle state
+  const [movies, setMovies] = useState<Movie[]>([]); // Loaded movie list
+  const [searchTerm, setSearchTerm] = useState(''); // Current search input
+  const [loading, setLoading] = useState(false); // Loading indicator
+  const [error, setError] = useState(''); // Error message
 
-
+  // Load saved theme preference from local storage
   useEffect(() => {
     const savedTheme = localStorage.getItem('docupicksTheme');
     if (savedTheme) setIsDarkTheme(savedTheme === 'dark');
   }, []);
 
+  // Persist theme preference to local storage
   useEffect(() => {
     localStorage.setItem('docupicksTheme', isDarkTheme ? 'dark' : 'light');
   }, [isDarkTheme]);
 
-
+  // Load movies on initial app load
   useEffect(() => {
     const initialize = async () => {
       setLoading(true);
@@ -187,6 +204,7 @@ function App() {
     initialize();
   }, []);
 
+  // Handle user-initiated search
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!searchTerm.trim()) return;
@@ -195,10 +213,12 @@ function App() {
     try {
       const response = await axios.get(`https://www.omdbapi.com/?t=${encodeURIComponent(searchTerm)}&apikey=${import.meta.env.VITE_OMDB_API_KEY}`);
 
+      // Ensure the movie is a documentary
       if (response.data.Response !== 'True' || !response.data.Genre.toLowerCase().includes('documentary')) {
         throw new Error(response.data.Error || 'Not a documentary');
       }
 
+      // Add new result if not already shown
       setMovies(prev => {
         const exists = prev.some(m => m.imdbID === response.data.imdbID);
         return exists ? prev : [...prev, response.data].sort((a, b) =>
@@ -213,6 +233,7 @@ function App() {
     }
   };
 
+  // Main app rendering
   return (
     <ThemeProvider theme={isDarkTheme ? imdbDarkTheme : imdbLightTheme}>
       <CssBaseline />
@@ -226,9 +247,12 @@ function App() {
         />
 
         <Container component="main" maxWidth="xl" sx={{ py: 4, flex: 1, px: { xs: 2, sm: 3 } }}>
+          {/* Show loading spinner */}
           {loading && <CircularProgress sx={{ display: 'block', margin: '4rem auto' }} />}
+          {/* Display any errors */}
           {error && <Alert severity="error" sx={{ mb: 3 }}>{error}</Alert>}
 
+          {/* Grid layout for displaying movies */}
           <Grid container spacing={3} sx={{
             display: 'grid',
             gridTemplateColumns: {
