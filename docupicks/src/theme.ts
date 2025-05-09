@@ -15,7 +15,7 @@ const imdbDarkTheme = createTheme({
         },
         background: {
             default: '#121212',        // Default background color
-            paper: '#1a1a1a',          // Background for components like cards and modals
+            paper: '#000000',          // Background for components like cards and modals
         },
         text: {
             primary: '#ffffff',        // Main text color (white)
@@ -48,9 +48,9 @@ const imdbDarkTheme = createTheme({
                     textTransform: 'none',    // Keep original text casing
                 },
                 textPrimary: {
-                    color: '#ffffff', // Force white text for text buttons
+                    color: '#f5c518', // Force white text for text buttons
                     '&:hover': {
-                        backgroundColor: 'rgba(255, 255, 255, 0.08)', // Subtle hover effect
+                        backgroundColor: 'rgba(204, 174, 74, 0.1)', // Subtle hover effect
                     },
                 },
             },

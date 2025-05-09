@@ -37,6 +37,12 @@ body {
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5) !important;
 }
 
+button.MuiButtonBase-root.MuiButton-root.MuiButton-outlined.MuiButton-outlinedPrimary.MuiButton-sizeSmall.MuiButton-outlinedSizeSmall.MuiButton-colorPrimary.MuiButton-root.MuiButton-outlined.MuiButton-outlinedPrimary.MuiButton-sizeSmall.MuiButton-outlinedSizeSmall.MuiButton-colorPrimary.css-711gff-MuiButtonBase-root-MuiButton-root {
+  color: #f5c518ff !important;
+  border: solid;
+  border-width: 1px;
+}
+
 /* Footer styling */
 footer {
   background-color: #000 !important;
