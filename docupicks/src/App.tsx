@@ -1,21 +1,32 @@
 import { useEffect, useState } from 'react';
-import { CircularProgress, Box, Alert, Grid, Container, CssBaseline } from '@mui/material';
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
+import { CircularProgress, Box, Alert, Grid, Container, CssBaseline, useTheme, useMediaQuery } from '@mui/material';
 import axios from 'axios';
 import { Header } from './components/Header';
 import { MovieCard } from './components/MovieCard';
 import { Footer } from './components/Footer';
 import type { Movie } from './types';
-import './App.css'
+import './App.css';
 
 const initialDocs = ['13th', 'Citizenfour', 'Icarus', 'Free Solo', 'The Act of Killing'];
+
+function useColumns() {
+  const theme = useTheme();
+  const isXs = useMediaQuery(theme.breakpoints.only('xs'));
+  const isSm = useMediaQuery(theme.breakpoints.only('sm'));
+  const isMd = useMediaQuery(theme.breakpoints.only('md'));
+
+  if (isXs) return 1;
+  if (isSm) return 2;
+  if (isMd) return 3;
+  return 4; // lg and up
+}
 
 function App() {
   const [movies, setMovies] = useState<Movie[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const columns = useColumns();
 
   useEffect(() => {
     const fetchInitialMovies = async () => {
@@ -93,7 +104,15 @@ function App() {
           handleSearch={handleSearch}
         />
 
-        <Container component="main" sx={{ py: 4, flex: 1 }}>
+        <Container
+          component="main"
+          maxWidth="xl"
+          sx={{
+            py: 4,
+            flex: 1,
+            px: { xs: 2, sm: 3, md: 4 }
+          }}
+        >
           {loading && <CircularProgress sx={{ display: 'block', margin: '20px auto' }} />}
 
           {error && (
@@ -102,9 +121,30 @@ function App() {
             </Alert>
           )}
 
-          <Grid container spacing={3}>
+          <Grid
+            container
+            spacing={3}
+            sx={{
+              '--columns': columns,
+              width: '100%',
+              margin: '0 auto',
+              justifyContent: 'center',
+              padding: '0 24px !important'
+            }}
+          >
             {movies.map(movie => (
-              <Grid item key={movie.imdbID} xs={12} sm={6} md={4}>
+              <Grid
+                item
+                key={movie.imdbID}
+                xs={12}
+                sx={{
+                  display: 'flex',
+                  flexGrow: 0,
+                  flexBasis: `calc(100% / var(--columns) - 24px)`,
+                  maxWidth: `calc(100% / var(--columns) - 24px)`,
+                  justifyContent: 'center'
+                }}
+              >
                 <MovieCard movie={movie} />
               </Grid>
             ))}
@@ -117,4 +157,4 @@ function App() {
   );
 }
 
-export default App
+export default App;
