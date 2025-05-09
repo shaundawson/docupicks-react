@@ -1,56 +1,45 @@
-:root {
-  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
-  line-height: 1.5;
-  font-weight: 400;
-  color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
+/* Remove all previous CSS and replace with: */
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap');
 
-html,
-body,
-#root {
+body {
   margin: 0;
-  padding: 0;
+  background-color: #121212;
 }
 
-#root {
-  display: flex;
-  flex-direction: column;
-  min-height: 100vh;
+/* IMDb-like loading spinner */
+.MuiCircularProgress-root {
+  color: #f5c518 !important;
 }
 
-.MuiCard-root {
-  border-radius: 12px !important;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1) !important;
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
 }
 
-.MuiCardMedia-root {
-  image-rendering: crisp-edges;
-  border-radius: 12px 12px 0 0 !important;
+::-webkit-scrollbar-track {
+  background: #1a1a1a;
 }
 
-.MuiGrid-container {
-  width: 100% !important;
-  max-width: 1600px !important;
-  margin: 0 auto !important;
+::-webkit-scrollbar-thumb {
+  background: #f5c518;
+  border-radius: 4px;
 }
 
-@media (prefers-color-scheme: light) {
-  :root {
-    color: #213547;
-    background-color: #ffffff;
-  }
+/* IMDb-style alerts */
+.MuiAlert-standardError {
+  background-color: #3a1d1d !important;
+  border: 1px solid #5c2c2c;
+}
 
-  a:hover {
-    color: #747bff;
-  }
+/* Header styling */
+.MuiAppBar-root {
+  background-color: #000000 !important;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5) !important;
+}
 
-  button {
-    background-color: #f9f9f9;
-  }
+/* Footer styling */
+footer {
+  background-color: #000 !important;
+  padding: 20px 0;
+  margin-top: auto;
 }
