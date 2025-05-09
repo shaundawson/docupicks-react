@@ -12,3 +12,9 @@ export interface Movie {
     Response?: string;
     Error?: string;
 }
+
+export interface HeaderProps {
+    searchTerm: string;
+    setSearchTerm: (term: string) => void;
+    handleSearch: (e: React.FormEvent) => void;
+}

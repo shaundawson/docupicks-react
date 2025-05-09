@@ -1,5 +1,5 @@
 import { Card, CardContent, CardMedia, Typography, Chip, Stack } from '@mui/material';
-import { Movie } from '../types';
+import type { Movie } from '../types';
 
 export const MovieCard = ({ movie }: { movie: Movie }) => (
     <Card sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>

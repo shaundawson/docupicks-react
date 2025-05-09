@@ -1,4 +1,5 @@
 import { AppBar, Toolbar, TextField, Button, Box } from '@mui/material';
+import type { HeaderProps } from '../types';
 
 interface HeaderProps {
     searchTerm: string;
