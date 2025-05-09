@@ -32,6 +32,8 @@ export interface Movie {
 
 export interface HeaderProps {
     searchTerm: string;
-    setSearchTerm: (term: string) => void;
+    setSearchTerm: (value: string) => void;
     handleSearch: (e: React.FormEvent) => void;
+    toggleTheme?: () => void;
+    isDarkTheme?: boolean;
 }

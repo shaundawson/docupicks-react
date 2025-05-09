@@ -1,20 +1,37 @@
-import { AppBar, Toolbar, TextField, Button, Box, Typography } from '@mui/material';
+import {
+    AppBar,
+    Toolbar,
+    TextField,
+    Button,
+    Box,
+    Typography,
+    IconButton
+} from '@mui/material';
+import Brightness4Icon from '@mui/icons-material/Brightness4';
+import Brightness7Icon from '@mui/icons-material/Brightness7';
 import type { HeaderProps } from '../types';
 
-export const Header = ({ searchTerm, setSearchTerm, handleSearch }: HeaderProps) => (
-    <AppBar position="sticky" sx={{ background: '#000', boxShadow: '0 2px 4px rgba(0,0,0,0.5)' }}>
+export const Header = ({
+    searchTerm,
+    setSearchTerm,
+    handleSearch,
+    toggleTheme,
+    isDarkTheme
+}: HeaderProps) => (
+    <AppBar position="sticky" color="primary">
         <Toolbar sx={{ gap: 2, py: 1 }}>
-            {/* IMDb-style logo text */}
-            <Typography variant="h6" sx={{
-                fontWeight: 700,
-                color: 'primary.main',
-                letterSpacing: '-0.5px',
-                mr: 3
-            }}>
+            <Typography
+                variant="h6"
+                sx={{
+                    fontWeight: 700,
+                    color: 'primary.contrastText',
+                    letterSpacing: '-0.5px',
+                    mr: 3
+                }}
+            >
                 DOCUPICKS
             </Typography>
 
-            {/* Search form with preserved functionality */}
             <Box component="form" onSubmit={handleSearch} sx={{ flexGrow: 1 }}>
                 <TextField
                     fullWidth
@@ -28,13 +45,13 @@ export const Header = ({ searchTerm, setSearchTerm, handleSearch }: HeaderProps)
                             borderRadius: '30px',
                             backgroundColor: 'background.paper',
                             '& fieldset': {
-                                borderColor: 'primary.main',
+                                borderColor: 'secondary.main',
                             },
                             '&:hover fieldset': {
-                                borderColor: 'primary.light',
+                                borderColor: 'secondary.light',
                             },
                             '&.Mui-focused fieldset': {
-                                borderColor: 'primary.main',
+                                borderColor: 'secondary.main',
                                 borderWidth: 2,
                             },
                         }
@@ -44,7 +61,7 @@ export const Header = ({ searchTerm, setSearchTerm, handleSearch }: HeaderProps)
                             <Button
                                 type="submit"
                                 variant="contained"
-                                color="primary"
+                                color="secondary"
                                 sx={{
                                     borderRadius: '20px',
                                     px: 3,
@@ -59,6 +76,19 @@ export const Header = ({ searchTerm, setSearchTerm, handleSearch }: HeaderProps)
                     }}
                 />
             </Box>
+
+            <IconButton
+                onClick={toggleTheme}
+                color="inherit"
+                sx={{
+                    color: 'primary.contrastText',
+                    '&:hover': {
+                        backgroundColor: 'rgba(255, 255, 255, 0.1)'
+                    }
+                }}
+            >
+                {isDarkTheme ? <Brightness7Icon /> : <Brightness4Icon />}
+            </IconButton>
         </Toolbar>
     </AppBar>
 );

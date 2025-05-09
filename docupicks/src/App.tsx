@@ -6,6 +6,9 @@ import { MovieCard } from './components/MovieCard';
 import { Footer } from './components/Footer';
 import type { Movie } from './types';
 import './App.css';
+import { ThemeProvider } from '@mui/material/styles';
+import { imdbDarkTheme, imdbLightTheme } from './theme';
+
 
 // Config Constants
 const DEBUG = true;
@@ -152,10 +155,22 @@ async function loadMovies() {
 }
 
 function App() {
+  const [isDarkTheme, setIsDarkTheme] = useState(true);
   const [movies, setMovies] = useState<Movie[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+
+
+  useEffect(() => {
+    const savedTheme = localStorage.getItem('docupicksTheme');
+    if (savedTheme) setIsDarkTheme(savedTheme === 'dark');
+  }, []);
+
+  useEffect(() => {
+    localStorage.setItem('docupicksTheme', isDarkTheme ? 'dark' : 'light');
+  }, [isDarkTheme]);
+
 
   useEffect(() => {
     const initialize = async () => {
@@ -199,10 +214,16 @@ function App() {
   };
 
   return (
-    <>
+    <ThemeProvider theme={isDarkTheme ? imdbDarkTheme : imdbLightTheme}>
       <CssBaseline />
       <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
-        <Header {...{ searchTerm, setSearchTerm, handleSearch }} />
+        <Header
+          searchTerm={searchTerm}
+          setSearchTerm={setSearchTerm}
+          handleSearch={handleSearch}
+          toggleTheme={() => setIsDarkTheme(!isDarkTheme)}
+          isDarkTheme={isDarkTheme}
+        />
 
         <Container component="main" maxWidth="xl" sx={{ py: 4, flex: 1, px: { xs: 2, sm: 3 } }}>
           {loading && <CircularProgress sx={{ display: 'block', margin: '4rem auto' }} />}
@@ -229,7 +250,7 @@ function App() {
 
         <Footer />
       </Box>
-    </>
+    </ThemeProvider>
   );
 }
 
