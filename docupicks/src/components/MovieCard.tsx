@@ -1,18 +1,14 @@
 import { useState } from 'react';
-import {
-    Box,
-    Card,
-    CardContent,
-    CardMedia,
-    Typography,
-    Chip,
-    Stack,
-    Button,
-    Modal,
-    CardActions
-} from '@mui/material';
+import { Box, Card, CardContent, CardMedia, Typography, Chip, Stack, Button, Modal, CardActions, IconButton, Link } from '@mui/material';
 import InfoIcon from '@mui/icons-material/Info';
+import CloseIcon from '@mui/icons-material/Close';
+import OpenInNewIcon from '@mui/icons-material/OpenInNew';
 import type { Movie } from '../types';
+
+// Import local IMDb logo files
+import imdbLogo from '../assets/IMDB_Logo.png';
+import imdbProLogo from '../assets/IMDbPro.png';
+
 
 const modalStyle = {
     position: 'absolute',
@@ -32,6 +28,9 @@ const modalStyle = {
 export const MovieCard = ({ movie }: { movie: Movie }) => {
     const [open, setOpen] = useState(false);
     const rottenTomatoes = movie.Ratings?.find(r => r.Source === 'Rotten Tomatoes')?.Value || 'N/A';
+    const imdbFullCreditsUrl = `https://www.imdb.com/title/${movie.imdbID}/fullcredits/`;
+    const imdbProUrl = `https://pro.imdb.com/title/${movie.imdbID}`;
+
 
     return (
         <>
@@ -46,7 +45,6 @@ export const MovieCard = ({ movie }: { movie: Movie }) => {
                     boxShadow: '0 4px 8px rgba(245, 197, 24, 0.2)'
                 }
             }}>
-                {/* Poster Image with Gradient Overlay */}
                 <Box sx={{
                     position: 'relative',
                     aspectRatio: '2/3',
@@ -71,7 +69,6 @@ export const MovieCard = ({ movie }: { movie: Movie }) => {
                         }}
                     />
 
-                    {/* Rating Chips */}
                     <Stack direction="row" spacing={1} sx={{
                         position: 'absolute',
                         top: 16,
@@ -87,7 +84,6 @@ export const MovieCard = ({ movie }: { movie: Movie }) => {
                     </Stack>
                 </Box>
 
-                {/* Content Area with Bottom Padding for Button */}
                 <Box sx={{
                     flexGrow: 1,
                     position: 'relative',
@@ -103,7 +99,6 @@ export const MovieCard = ({ movie }: { movie: Movie }) => {
                             {movie.Title}
                         </Typography>
 
-                        {/* Metadata Chips */}
                         <Stack direction="row" spacing={1} mb={2} flexWrap="wrap" gap={1}>
                             <Chip
                                 label={movie.Year}
@@ -125,22 +120,6 @@ export const MovieCard = ({ movie }: { movie: Movie }) => {
                             />
                         </Stack>
 
-                        {/* Truncated Plot */}
-                        {/* <Typography
-                            variant="body2"
-                            color="text.secondary"
-                            sx={{
-                                display: '-webkit-box',
-                                WebkitLineClamp: 3,
-                                WebkitBoxOrient: 'vertical',
-                                overflow: 'hidden',
-                                mb: 2,
-                                fontSize: '0.875rem'
-                            }}
-                        >
-                            {movie.Plot}
-                        </Typography> */}
-
                         <Typography
                             variant="caption"
                             color="text.secondary"
@@ -150,7 +129,6 @@ export const MovieCard = ({ movie }: { movie: Movie }) => {
                         </Typography>
                     </CardContent>
 
-                    {/* Fixed Position Button */}
                     <CardActions sx={{
                         position: 'absolute',
                         bottom: 0,
@@ -179,9 +157,21 @@ export const MovieCard = ({ movie }: { movie: Movie }) => {
                 </Box>
             </Card>
 
-            {/* Details Modal */}
             <Modal open={open} onClose={() => setOpen(false)}>
                 <Box sx={modalStyle}>
+                    <IconButton
+                        aria-label="close"
+                        onClick={() => setOpen(false)}
+                        sx={{
+                            position: 'absolute',
+                            right: 16,
+                            top: 16,
+                            color: 'text.secondary'
+                        }}
+                    >
+                        <CloseIcon />
+                    </IconButton>
+
                     <Typography variant="h4" gutterBottom>{movie.Title}</Typography>
                     <Stack direction="row" spacing={2} sx={{ mb: 2 }}>
                         <Chip label={movie.Year} color="primary" />
@@ -230,6 +220,97 @@ export const MovieCard = ({ movie }: { movie: Movie }) => {
                                 />
                             ))}
                         </Stack>
+                    </Box>
+
+                    {/* Streaming providers section */}
+                    {movie.WatchProviders && movie.WatchProviders.length > 0 && (
+                        <Box sx={{ mt: 3 }}>
+                            <Typography variant="h6" gutterBottom>
+                                Available On
+                            </Typography>
+                            <Stack direction="row" spacing={2} sx={{ flexWrap: 'wrap', gap: 2 }}>
+                                {movie.WatchProviders.map((provider) => (
+                                    <Box key={provider.id} sx={{
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: 1,
+                                        p: 1,
+                                        bgcolor: 'background.paper',
+                                        borderRadius: 1,
+                                        boxShadow: 1
+                                    }}>
+                                        <img
+                                            src={`https://image.tmdb.org/t/p/w45${provider.logo_path}`}
+                                            alt={provider.name}
+                                            style={{ height: 30 }}
+                                        />
+                                        <Typography variant="body2">{provider.name}</Typography>
+                                    </Box>
+                                ))}
+                            </Stack>
+                        </Box>
+                    )}
+
+                    {/* IMDb Links Section */}
+                    <Box sx={{ mt: 3, display: 'flex', gap: 2, flexDirection: 'column' }}>
+                        <Typography variant="h6" gutterBottom>IMDb Links</Typography>
+                        <Stack direction="row" spacing={2} flexWrap="wrap" gap={2}>
+                            <Link
+                                href={imdbFullCreditsUrl}
+                                target="_blank"
+                                rel="noopener"
+                                sx={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: 1,
+                                    color: 'text.primary',
+                                    '&:hover': {
+                                        color: 'primary.main',
+                                        textDecoration: 'none'
+                                    }
+                                }}
+                            >
+                                <OpenInNewIcon fontSize="small" />
+                                <Typography>Full Credits on IMDb</Typography>
+                            </Link>
+
+                            <Link
+                                href={imdbProUrl}
+                                target="_blank"
+                                rel="noopener"
+                                sx={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: 1,
+                                    color: 'text.primary',
+                                    '&:hover': {
+                                        color: 'primary.main',
+                                        textDecoration: 'none'
+                                    }
+                                }}
+                            >
+                                <OpenInNewIcon fontSize="small" />
+                                <Typography>IMDb Pro Details</Typography>
+                            </Link>
+                        </Stack>
+                    </Box>
+
+                    {/* Close Button */}
+
+                    <Box sx={{ mt: 3, display: 'flex', justifyContent: 'center' }}>
+                        <Button
+                            variant="outlined"
+                            onClick={() => setOpen(false)}
+                            startIcon={<CloseIcon />}
+                            sx={{
+                                borderRadius: 2,
+                                px: 4,
+                                py: 1,
+                                fontWeight: 'bold'
+                            }}
+                        >
+                            Close Details
+                        </Button>
                     </Box>
                 </Box>
             </Modal>

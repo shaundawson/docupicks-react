@@ -16,6 +16,10 @@ export interface Movie {
     Ratings: {
         Source: string;
         Value: string;
+    WatchProviders?: {
+        id: number;
+        name: string;
+        logo_path: string;
     }[];
     Metascore: string;
     imdbRating: string;

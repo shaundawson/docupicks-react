@@ -14,12 +14,12 @@ import { imdbDarkTheme, imdbLightTheme } from './theme';
 
 // Configuration constants
 const DEBUG = true; // Enable debug logs
-const MAX_RETRY_PAGES = 4; // Max number of TMDB pages to query
+const MAX_RETRY_PAGES = 1; // Max number of TMDB pages to query
 const DOCUMENTARY_GENRE_ID = 99; // TMDB genre ID for documentaries
-const TOP_MOVIES_LIMIT = 12; // Limit on number of top-rated movies to display
+const TOP_MOVIES_LIMIT = 16; // Limit on number of movies to display
 const FALLBACK_MOVIES = ['13th', 'Citizenfour', 'Icarus', 'Free Solo', 'The Act of Killing']; // Default fallback movies
 const OMDB_DELAY = 500; // Delay between OMDB API calls (ms)
-const MIN_YEAR = 1983; // Minimum release year
+const MIN_YEAR = 2015; // Minimum release year
 const MAX_YEAR = 2025; // Maximum release year
 
 // Interface representing a basic movie from TMDB
@@ -45,11 +45,14 @@ async function fetchDocumentaries(page: number): Promise<TMDBMovie[]> {
     const params = {
       api_key: import.meta.env.VITE_TMDB_API_KEY,
       with_genres: DOCUMENTARY_GENRE_ID,
-      sort_by: 'popularity.desc',
-      'vote_count.gte': 100,
-      'vote_average.gte': 8.0,
+      sort_by: 'rating.desc',
+      'vote_count.gte': 200,
+      'vote_average.gte': 7.0,
       'primary_release_date.gte': `${MIN_YEAR}-01-01`,
       'primary_release_date.lte': `${MAX_YEAR}-12-31`,
+      with_watch_providers: '', // Netflix provider ID (adjust as needed)
+      watch_region: 'US', // Region code
+      with_watch_monetization_types: 'flatrate', // Subscription services
       include_adult: false,
       page,
       language: 'en-US',
@@ -58,6 +61,17 @@ async function fetchDocumentaries(page: number): Promise<TMDBMovie[]> {
 
     const response = await axios.get('https://api.themoviedb.org/3/discover/movie', { params });
 
+    // Debug: TMDB Response
+    // DEBUG && console.debug('✅ TMDB Response:', {
+    //   page,
+    //   results: response.data.results.length,
+    //   movies: response.data.results.map((m: any) => ({
+    //     title: m.title,
+    //     year: m.release_date?.split('-')[0],
+    //     overview: m.overview
+    //   }))
+    // });
+
     // Simplify the movie objects returned by TMDB
     return response.data.results.map((movie: any) => ({
       id: movie.id,
@@ -65,7 +79,8 @@ async function fetchDocumentaries(page: number): Promise<TMDBMovie[]> {
       vote_average: movie.vote_average,
       vote_count: movie.vote_count,
       release_date: movie.release_date,
-      overview: movie.overview
+      overview: movie.overview,
+      watch_providers: movie['watch/providers']?.results?.US?.flatrate || []
     }));
   } catch (error) {
     console.error('TMDB API Error:', error);
@@ -77,6 +92,19 @@ async function fetchDocumentaries(page: number): Promise<TMDBMovie[]> {
 async function validateMovie(tmdbMovie: TMDBMovie): Promise<MovieDetails | null> {
   try {
     const releaseYear = tmdbMovie.release_date?.split('-')[0] || '';
+
+    // Debug: Log OMDB request details
+    // DEBUG && console.debug('🔍 OMDB Request:', {
+    //   title: tmdbMovie.title,
+    //   year: releaseYear,
+    //   params: {
+    //     t: tmdbMovie.title,
+    //     y: releaseYear,
+    //     type: 'movie',
+    //     apikey: '***' // Redacted for security
+    //   }
+    // });
+
     const response = await axios.get(`https://www.omdbapi.com/`, {
       params: {
         t: tmdbMovie.title,
@@ -85,6 +113,18 @@ async function validateMovie(tmdbMovie: TMDBMovie): Promise<MovieDetails | null>
         apikey: import.meta.env.VITE_OMDB_API_KEY
       }
     });
+
+    // Debug: Log full OMDB response
+    // DEBUG && console.debug('📥 OMDB Response:', {
+    //   title: tmdbMovie.title,
+    //   status: response.data.Response,
+    //   data: response.data,
+    //   matchDetails: {
+    //     titleMatch: response.data.Title === tmdbMovie.title,
+    //     yearMatch: response.data.Year === releaseYear,
+    //     typeMatch: response.data.Type === 'movie'
+    //   }
+    // });
 
     if (response.data.Response !== 'True') return null;
 
@@ -101,13 +141,25 @@ async function validateMovie(tmdbMovie: TMDBMovie): Promise<MovieDetails | null>
     const hasRating = response.data.imdbRating !== 'N/A';
     if (!isDocumentary || !hasRating) return null;
 
+    const providersResponse = await axios.get(
+      `https://api.themoviedb.org/3/movie/${tmdbMovie.id}/watch/providers`,
+      { params: { api_key: import.meta.env.VITE_TMDB_API_KEY } }
+    );
+
+    const watchProviders = providersResponse.data.results?.US?.flatrate || [];
+
     // Return enriched movie details
     return {
       ...response.data,
       imdbRating: response.data.imdbRating,
       Year: response.data.Year,
       Genre: response.data.Genre,
-      Poster: response.data.Poster !== 'N/A' ? response.data.Poster : '/placeholder.jpg'
+      Poster: response.data.Poster !== 'N/A' ? response.data.Poster : '/placeholder.jpg',
+      WatchProviders: watchProviders.map((p: any) => ({
+        id: p.provider_id,
+        name: p.provider_name,
+        logo_path: p.logo_path
+      })),
     };
   } catch (error) {
     console.error(`Validation failed for ${tmdbMovie.title}:`, error);
@@ -253,19 +305,23 @@ function App() {
           {error && <Alert severity="error" sx={{ mb: 3 }}>{error}</Alert>}
 
           {/* Grid layout for displaying movies */}
-          <Grid container spacing={3} sx={{
-            display: 'grid',
-            gridTemplateColumns: {
-              xs: 'repeat(1, minmax(0, 1fr))',
-              sm: 'repeat(2, minmax(0, 1fr))',
-              md: 'repeat(3, minmax(0, 1fr))',
-              lg: 'repeat(4, minmax(0, 1fr))'
-            },
-            gap: 3,
-            padding: '0 24px !important'
-          }}>
+          <Grid
+            container
+            spacing={3}
+            sx={{
+              display: 'grid',
+              gridTemplateColumns: {
+                xs: 'repeat(1, minmax(0, 1fr))',  // 1 column on mobile
+                sm: 'repeat(2, minmax(0, 1fr))',   // 2 columns on small screens
+                md: 'repeat(3, minmax(0, 1fr))',   // 3 columns on medium
+                lg: 'repeat(4, minmax(0, 1fr))'    // 4 columns on large
+              },
+              gap: 3,
+              padding: '0 24px !important'
+            }}
+          >
             {movies.map(movie => (
-              <Grid item key={movie.imdbID} xs={12} sm={6} md={4} lg={3}>
+              <Grid key={movie.imdbID}>  {/* No item prop or size props */}
                 <MovieCard movie={movie} />
               </Grid>
             ))}
