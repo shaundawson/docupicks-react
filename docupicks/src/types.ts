@@ -13,9 +13,13 @@ export interface Movie {
     Country: string;
     Awards: string;
     Poster: string;
+    tmdbId?: number;
+    wikipediaUrl?: string;
+    budget?: string; 
     Ratings: {
         Source: string;
         Value: string;
+    }
     WatchProviders?: {
         id: number;
         name: string;

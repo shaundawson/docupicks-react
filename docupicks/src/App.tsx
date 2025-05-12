@@ -146,7 +146,9 @@ async function validateMovie(tmdbMovie: TMDBMovie): Promise<MovieDetails | null>
       { params: { api_key: import.meta.env.VITE_TMDB_API_KEY } }
     );
 
+    // Get streaming providers from TMDB
     const watchProviders = providersResponse.data.results?.US?.flatrate || [];
+
 
     // Return enriched movie details
     return {
@@ -155,6 +157,7 @@ async function validateMovie(tmdbMovie: TMDBMovie): Promise<MovieDetails | null>
       Year: response.data.Year,
       Genre: response.data.Genre,
       Poster: response.data.Poster !== 'N/A' ? response.data.Poster : '/placeholder.jpg',
+      tmdbId: tmdbMovie.id,
       WatchProviders: watchProviders.map((p: any) => ({
         id: p.provider_id,
         name: p.provider_name,
@@ -166,6 +169,7 @@ async function validateMovie(tmdbMovie: TMDBMovie): Promise<MovieDetails | null>
     return null;
   }
 }
+
 
 // Main logic to load and validate movies from TMDB and OMDB
 async function loadMovies() {

@@ -1,13 +1,11 @@
+
+import React from 'react';
 import { useState } from 'react';
 import { Box, Card, CardContent, CardMedia, Typography, Chip, Stack, Button, Modal, CardActions, IconButton, Link } from '@mui/material';
 import InfoIcon from '@mui/icons-material/Info';
 import CloseIcon from '@mui/icons-material/Close';
 import OpenInNewIcon from '@mui/icons-material/OpenInNew';
 import type { Movie } from '../types';
-
-// Import local IMDb logo files
-import imdbLogo from '../assets/IMDB_Logo.png';
-import imdbProLogo from '../assets/IMDbPro.png';
 
 
 const modalStyle = {
@@ -23,11 +21,24 @@ const modalStyle = {
     borderRadius: 2,
     maxHeight: '90vh',
     overflowY: 'auto',
+    '&::-webkit-scrollbar': {
+        width: '8px',
+    },
+    '&::-webkit-scrollbar-track': {
+        background: (theme) => theme.palette.mode === 'dark' ? '#1a1a1a' : '#f1f1f1',
+        borderRadius: '4px',
+    },
+    '&::-webkit-scrollbar-thumb': {
+        background: (theme) => theme.palette.primary.main,
+        borderRadius: '4px',
+        '&:hover': {
+            background: (theme) => theme.palette.primary.dark,
+        }
+    },
 };
 
 export const MovieCard = ({ movie }: { movie: Movie }) => {
     const [open, setOpen] = useState(false);
-    const rottenTomatoes = movie.Ratings?.find(r => r.Source === 'Rotten Tomatoes')?.Value || 'N/A';
     const imdbFullCreditsUrl = `https://www.imdb.com/title/${movie.imdbID}/fullcredits/`;
     const imdbProUrl = `https://pro.imdb.com/title/${movie.imdbID}`;
 
@@ -172,6 +183,7 @@ export const MovieCard = ({ movie }: { movie: Movie }) => {
                         <CloseIcon />
                     </IconButton>
 
+                    {/* Year, Runtime, Rated Buttons */}
                     <Typography variant="h4" gutterBottom>{movie.Title}</Typography>
                     <Stack direction="row" spacing={2} sx={{ mb: 2 }}>
                         <Chip label={movie.Year} color="primary" />
@@ -179,14 +191,29 @@ export const MovieCard = ({ movie }: { movie: Movie }) => {
                         <Chip label={movie.Rated} variant="outlined" />
                     </Stack>
 
+                    {/* Plot Summary */}
                     <Box sx={{ mb: 3 }}>
-                        <Typography variant="h6" gutterBottom>Plot Summary</Typography>
                         <Typography variant="body1" sx={{
                             whiteSpace: 'pre-wrap',
                             overflowWrap: 'break-word',
                             maxHeight: '300px',
                             overflowY: 'auto',
-                            pr: 2
+                            pr: 2,
+                            // Apply the same scrollbar styling
+                            '&::-webkit-scrollbar': {
+                                width: '6px',
+                            },
+                            '&::-webkit-scrollbar-track': {
+                                background: (theme) => theme.palette.mode === 'dark' ? '#1a1a1a' : '#f1f1f1',
+                                borderRadius: '4px',
+                            },
+                            '&::-webkit-scrollbar-thumb': {
+                                background: (theme) => theme.palette.primary.main,
+                                borderRadius: '4px',
+                                '&:hover': {
+                                    background: (theme) => theme.palette.primary.dark,
+                                }
+                            }
                         }}>
                             {movie.Plot}
                         </Typography>
@@ -208,6 +235,7 @@ export const MovieCard = ({ movie }: { movie: Movie }) => {
                         )}
                     </Stack>
 
+                    {/* Ratings */}
                     <Box>
                         <Typography variant="h6" gutterBottom>Ratings</Typography>
                         <Stack direction="row" spacing={2} flexWrap="wrap" gap={2}>
@@ -222,7 +250,7 @@ export const MovieCard = ({ movie }: { movie: Movie }) => {
                         </Stack>
                     </Box>
 
-                    {/* Streaming providers section */}
+                    {/* Streaming Providers */}
                     {movie.WatchProviders && movie.WatchProviders.length > 0 && (
                         <Box sx={{ mt: 3 }}>
                             <Typography variant="h6" gutterBottom>
@@ -296,7 +324,6 @@ export const MovieCard = ({ movie }: { movie: Movie }) => {
                     </Box>
 
                     {/* Close Button */}
-
                     <Box sx={{ mt: 3, display: 'flex', justifyContent: 'center' }}>
                         <Button
                             variant="outlined"
@@ -316,4 +343,5 @@ export const MovieCard = ({ movie }: { movie: Movie }) => {
             </Modal>
         </>
     );
+
 };
