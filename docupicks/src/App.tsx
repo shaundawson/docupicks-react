@@ -11,15 +11,15 @@ import type { Movie } from './types';
 import './App.css';
 import { ThemeProvider } from '@mui/material/styles';
 import { imdbDarkTheme, imdbLightTheme } from './theme';
+import { FALLBACK_MOVIES } from './fallbackMovies';
 
 // Configuration constants
 const DEBUG = true; // Enable debug logs
-const MAX_RETRY_PAGES = 1; // Max number of TMDB pages to query
+const MAX_RETRY_PAGES = 2; // Max number of TMDB pages to query
 const DOCUMENTARY_GENRE_ID = 99; // TMDB genre ID for documentaries
 const TOP_MOVIES_LIMIT = 16; // Limit on number of movies to display
-const FALLBACK_MOVIES = ['13th', 'Citizenfour', 'Icarus', 'Free Solo', 'The Act of Killing']; // Default fallback movies
 const OMDB_DELAY = 500; // Delay between OMDB API calls (ms)
-const MIN_YEAR = 2015; // Minimum release year
+const MIN_YEAR = 2023 // Minimum release year
 const MAX_YEAR = 2025; // Maximum release year
 
 // Interface representing a basic movie from TMDB
@@ -45,12 +45,12 @@ async function fetchDocumentaries(page: number): Promise<TMDBMovie[]> {
     const params = {
       api_key: import.meta.env.VITE_TMDB_API_KEY,
       with_genres: DOCUMENTARY_GENRE_ID,
-      sort_by: 'rating.desc',
-      'vote_count.gte': 200,
-      'vote_average.gte': 7.0,
+      sort_by: 'popularity.desc',
+      'vote_count.gte': 40,
+      // 'vote_average.gte': 7.5,
       'primary_release_date.gte': `${MIN_YEAR}-01-01`,
       'primary_release_date.lte': `${MAX_YEAR}-12-31`,
-      with_watch_providers: '', // Netflix provider ID (adjust as needed)
+      with_watch_providers: '',
       watch_region: 'US', // Region code
       with_watch_monetization_types: 'flatrate', // Subscription services
       include_adult: false,
@@ -171,7 +171,7 @@ async function validateMovie(tmdbMovie: TMDBMovie): Promise<MovieDetails | null>
 }
 
 
-// Main logic to load and validate movies from TMDB and OMDB
+// Load and validate movies from TMDB and OMDB
 async function loadMovies() {
   try {
     let page = 1;

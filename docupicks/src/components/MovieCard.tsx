@@ -1,5 +1,3 @@
-
-import React from 'react';
 import { useState } from 'react';
 import { Box, Card, CardContent, CardMedia, Typography, Chip, Stack, Button, Modal, CardActions, IconButton, Link } from '@mui/material';
 import InfoIcon from '@mui/icons-material/Info';
