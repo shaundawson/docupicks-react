@@ -4,22 +4,35 @@
 [![TypeScript](https://img.shields.io/badge/TypeScript-4.9.5-blue)](https://www.typescriptlang.org/)
 [![Material-UI](https://img.shields.io/badge/Material--UI-5.14.18-blue)](https://mui.com/)
 
-DocuPicks is a documentary discovery platform that combines data from TMDB and OMDB to showcase high-quality documentaries from 2015 to present. Features intelligent validation and streaming availability info.
+**A focused React/TypeScript documentary discovery platform** curating essential documentaries about racial justice, police reform, and African American history in America. Powered by TMDB and OMDB APIs with intelligent content validation.
 
 ![DocuPicks Screenshot](./public/screenshot.jpg)
 
+## Tech Stack Highlights
+
+- **React 18** with TypeScript type safety
+- **Material-UI** modern component library
+- **Dual API integration** (TMDB + OMDB)
+- **Vite** build system for rapid development
+- **Responsive grid layouts** (1-4 columns)
+
+## Curated Focus Areas
+
+- 🚨 Police brutality and reform
+- ✊🏿 Black Lives Matter movement
+- ⛓️ Historical slavery and its legacy
+- 🗳️ Voting rights and suppression
+- 📚 Systemic racism in America
+
 ## Key Features
 
-- 🎬 Curated selection of documentaries with IMDB ratings ≥7.0
+- 🎬 Curated selection of documentaries with IMDB ratings ≥6.0
 - 🔍 Dual API integration (TMDB + OMDB) for accurate data
-- 📅 Focus on recent releases (2015-2025)
 - 🛠️ Advanced content validation:
   - Genre verification
-  - Minimum 200 votes filter
   - Documentary text analysis
 - 📺 Streaming provider information (US region)
 - 🌗 Light/Dark theme toggle
-- 📱 Responsive grid layout (1-4 columns based on screen size)
 - 🛡️ Fallback to hand-picked classics when API fails
 - ⚡ Intelligent batching and rate limiting
 
@@ -35,3 +48,20 @@ DocuPicks is a documentary discovery platform that combines data from TMDB and O
 ```bash
 git clone https://github.com/shaundawson/docupicks-react.git
 cd docupicks-react
+```
+
+2. Install dependencies
+```bash
+npm install
+```
+
+3. Configure environment variables:
+```bash
+VITE_TMDB_API_KEY=your_tmdb_key
+VITE_OMDB_API_KEY=your_omdb_key
+```
+
+4. Start development server
+```bash
+npm run dev
+```
