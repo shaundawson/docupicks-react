@@ -1,8 +1,9 @@
 # DocuPicks - Curated Documentary Discovery
 
-[![React](https://img.shields.io/badge/React-18.2.0-blue)](https://reactjs.org/)
-[![TypeScript](https://img.shields.io/badge/TypeScript-4.9.5-blue)](https://www.typescriptlang.org/)
-[![Material-UI](https://img.shields.io/badge/Material--UI-5.14.18-blue)](https://mui.com/)
+[![React](https://img.shields.io/badge/React-18.2.0-%2361DAFB)](https://reactjs.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-4.9.5-%233178C6)](https://www.typescriptlang.org/)
+[![MUI](https://img.shields.io/badge/MUI-5.14.18-%23007FFF)](https://mui.com/)
+[![AWS](https://img.shields.io/badge/AWS-%23FF9900.svg?logo=amazon-aws&logoColor=white)](https://aws.amazon.com)
 
 **A focused React/TypeScript documentary discovery platform** curating essential documentaries about racial justice, police reform, and African American history in America. Powered by TMDB and OMDB APIs with intelligent content validation.
 
@@ -13,28 +14,39 @@
 - **React 18** with TypeScript type safety
 - **Material-UI** modern component library
 - **Dual API integration** (TMDB + OMDB)
+- **AWS Hosting** (S3 + CloudFront CDN)
 - **Vite** build system for rapid development
 - **Responsive grid layouts** (1-4 columns)
 
 ## Curated Focus Areas
 
-- 🚨 Police brutality and reform
-- ✊🏿 Black Lives Matter movement
-- ⛓️ Historical slavery and its legacy
-- 🗳️ Voting rights and suppression
-- 📚 Systemic racism in America
+- 🚨 Police brutality and reform  
+- ✊🏿 Black Lives Matter movement  
+- ⛓️ Historical slavery and its legacy  
+- 🗳️ Voting rights and suppression  
+- 📚 Systemic racism in America  
 
 ## Key Features
 
-- 🎬 Curated selection of documentaries with IMDB ratings ≥6.0
-- 🔍 Dual API integration (TMDB + OMDB) for accurate data
-- 🛠️ Advanced content validation:
-  - Genre verification
-  - Documentary text analysis
-- 📺 Streaming provider information (US region)
-- 🌗 Light/Dark theme toggle
-- 🛡️ Fallback to hand-picked classics when API fails
-- ⚡ Intelligent batching and rate limiting
+- 🎬 Curated selection of documentaries with IMDB ratings ≥6.0  
+- 🔍 Dual API integration (TMDB + OMDB) for accurate data  
+- 🛠️ Advanced content validation:  
+  - Genre verification  
+  - Documentary text analysis  
+- 📺 Streaming provider information (US region)  
+- 🌗 Light/Dark theme toggle  
+- 🛡️ Fallback to hand-picked classics when API fails  
+- ⚡ Intelligent batching and rate limiting  
+
+## AWS Hosting Architecture
+
+```mermaid
+graph TD
+  A[GitHub Repository] --> B[AWS Amplify CI/CD]
+  B --> C[S3 Bucket Storage]
+  C --> D[CloudFront CDN]
+  D --> E[Global Users]
+  B --> F[Auto-Invalidation]
 
 ## Data Sources
 

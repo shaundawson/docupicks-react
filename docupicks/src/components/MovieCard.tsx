@@ -3,6 +3,7 @@ import { Box, Card, CardContent, CardMedia, Typography, Chip, Stack, Button, Mod
 import InfoIcon from '@mui/icons-material/Info';
 import CloseIcon from '@mui/icons-material/Close';
 import OpenInNewIcon from '@mui/icons-material/OpenInNew';
+import type { Theme } from '@mui/material/styles';
 import type { Movie } from '../types';
 
 
@@ -23,16 +24,14 @@ const modalStyle = {
         width: '8px',
     },
     '&::-webkit-scrollbar-track': {
-        background: (theme) => theme.palette.mode === 'dark' ? '#1a1a1a' : '#f1f1f1',
-        borderRadius: '4px',
+        background: (theme: Theme) => theme.palette.mode === 'dark' ? '#1a1a1a' : '#f1f1f1',
     },
     '&::-webkit-scrollbar-thumb': {
-        background: (theme) => theme.palette.primary.main,
-        borderRadius: '4px',
+        background: (theme: Theme) => theme.palette.primary.main,
         '&:hover': {
-            background: (theme) => theme.palette.primary.dark,
+            background: (theme: Theme) => theme.palette.primary.dark,
         }
-    },
+    }
 };
 
 export const MovieCard = ({ movie }: { movie: Movie }) => {

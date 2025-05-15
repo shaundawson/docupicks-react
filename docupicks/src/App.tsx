@@ -484,7 +484,7 @@ function App() {
             }}
           >
             {movies.map(movie => (
-              <Box key={`${movie.imdbID}-${movie.tmdbId}`}>
+              <Box key={`${movie.imdbID}-${movie.tmdbId}`} sx={{ width: '100%' }}>
                 <MovieCard movie={movie} />
               </Box>
             ))}

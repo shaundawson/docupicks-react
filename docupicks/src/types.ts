@@ -19,7 +19,7 @@ export interface Movie {
     Ratings: {
         Source: string;
         Value: string;
-    }
+    }[];
     WatchProviders?: {
         id: number;
         name: string;
@@ -39,9 +39,6 @@ export interface Movie {
 }
 
 export interface HeaderProps {
-    searchTerm: string;
-    setSearchTerm: (value: string) => void;
-    handleSearch: (e: React.FormEvent) => void;
     toggleTheme?: () => void;
     isDarkTheme?: boolean;
 }
