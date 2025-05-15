@@ -48,6 +48,8 @@ graph TD
   D --> E[Global Users]
   B --> F[Auto-Invalidation]
 
+```
+
 ## Data Sources
 
 - **TMDB API** - Primary movie discovery and streaming providers
