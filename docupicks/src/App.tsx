@@ -1,6 +1,7 @@
 // React and MUI imports
 import { useEffect, useState } from 'react';
 import { CircularProgress, Box, Alert, Grid, Container, CssBaseline, Chip, Typography } from '@mui/material';
+import Grow from '@mui/material/Grow';
 import axios from 'axios';
 
 // Component imports
@@ -393,6 +394,21 @@ function App() {
   const [movies, setMovies] = useState<Movie[]>([]); // Loaded movie list
   const [loading, setLoading] = useState(false); // Loading indicator
   const [error, setError] = useState(''); // Error message
+  const [currentKeywordIndex, setCurrentKeywordIndex] = useState(-1);
+
+  // Keyword animation
+  useEffect(() => {
+    if (loading) {
+      const timer = setInterval(() => {
+        setCurrentKeywordIndex((prev) => Math.min(prev + 1, KEYWORDS.length - 1));
+      }, 300); // Adjust timing between keyword appearances
+
+      return () => clearInterval(timer);
+    } else {
+      setCurrentKeywordIndex(KEYWORDS.length - 1); // Show all immediately when loaded
+    }
+  }, [loading]);
+
 
   // Load saved theme preference from local storage
   useEffect(() => {
@@ -434,35 +450,84 @@ function App() {
 
 
         <Container component="main" maxWidth="xl" sx={{ py: 4, flex: 1, px: { xs: 2, sm: 3 } }}>
-          {/* Show loading spinner */}
-          {loading && <CircularProgress sx={{ display: 'block', margin: '4rem auto' }} />}
-          {/* Display any errors */}
+          {/* Enhanced loading state */}
+          {loading && (
+            <Box sx={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              minHeight: '50vh',
+              textAlign: 'center'
+            }}>
+              <Box sx={{ position: 'relative', width: 64, height: 64, mb: 3 }}>
+                <CircularProgress
+                  size={64}
+                  thickness={2}
+                  sx={{
+                    position: 'absolute',
+                    color: (theme) => theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.1)'
+                  }}
+                />
+                <CircularProgress
+                  size={64}
+                  thickness={2}
+                  sx={{
+                    position: 'absolute',
+                    left: 0,
+                    animationDuration: '2s',
+                    '& .MuiCircularProgress-circle': {
+                      strokeLinecap: 'round',
+                    }
+                  }}
+                />
+              </Box>
+              <Typography variant="body1" sx={{ mb: 2, color: 'text.secondary' }}>
+                Curating top documentaries about...
+              </Typography>
+            </Box>
+          )}
+
+          {/* Error display remains unchanged */}
           {error && <Alert severity="error" sx={{ mb: 3 }}>{error}</Alert>}
 
+          {/* Animated keywords section */}
           <Box sx={{
             mb: 4,
             display: 'flex',
             gap: 1,
             flexWrap: 'wrap',
-            alignItems: 'center',
-            px: { xs: 0, sm: 2 }
+            justifyContent: 'center',
+            px: { xs: 0, sm: 2 },
+            minHeight: loading ? '20vh' : 'auto'
           }}>
-            <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
+            <Typography variant="subtitle1" sx={{ fontWeight: 600, alignSelf: 'center' }}>
               Topics:
             </Typography>
             {KEYWORDS.map((keyword, index) => (
-              <Chip
+              <Grow
                 key={index}
-                label={keyword}
-                size="medium"
-                sx={{
-                  borderRadius: '6px',
-                  textTransform: 'capitalize',
-                  fontWeight: 500,
-                  bgcolor: 'primary.light',
-                  color: 'primary.contrastText'
-                }}
-              />
+                in={currentKeywordIndex >= index}
+                timeout={500}
+                style={{ transformOrigin: 'center bottom' }}
+              >
+                <Chip
+                  label={keyword}
+                  size="medium"
+                  sx={{
+                    borderRadius: '6px',
+                    textTransform: 'capitalize',
+                    fontWeight: 500,
+                    bgcolor: 'primary.light',
+                    color: 'primary.contrastText',
+                    transition: 'all 0.3s ease',
+                    transform: currentKeywordIndex >= index ? 'scale(1)' : 'scale(0.8)',
+                    opacity: currentKeywordIndex >= index ? 1 : 0,
+                    mr: 1,
+                    mb: 1
+                  }}
+                />
+              </Grow>
             ))}
           </Box>
 
