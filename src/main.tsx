@@ -3,7 +3,7 @@ import { createRoot } from 'react-dom/client'
 import { ThemeProvider } from '@mui/material/styles';
 import './index.css'
 import App from './App.tsx'
-import { imdbDarkTheme, imdbLightTheme } from './theme';
+import { imdbDarkTheme, imdbLightTheme } from './theme.ts';
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
