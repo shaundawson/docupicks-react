@@ -20,12 +20,10 @@
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true,
     "noUncheckedSideEffectImports": true,
-    // Add these lines:
     "outDir": "./dist",
     "rootDir": "./src",
-    "emitDeclarationOnly": false,
     "allowJs": true,
-    "noEmit": false // Change from true to false
+    "noEmit": false
   },
   "include": [
     "src"
