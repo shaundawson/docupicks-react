@@ -7,7 +7,7 @@
 
 **A focused React/TypeScript documentary discovery platform** curating essential documentaries about racial justice, police reform, and African American history in America. Powered by TMDB and OMDB APIs with intelligent content validation.
 
-![DocuPicks Screenshot](./public/screenshot.jpg)
+![DocuPicks](www.docupicks.com)
 
 ## Tech Stack Highlights
 
