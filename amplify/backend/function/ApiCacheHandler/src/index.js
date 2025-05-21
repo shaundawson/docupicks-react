@@ -7,7 +7,8 @@ const { DynamoDB } = require('aws-sdk');
 const axios = require('axios');
 
 const docClient = new DynamoDB.DocumentClient();
-const CACHE_TABLE = process.env.CACHE_TABLE!;
+const CACHE_TABLE = process.env.CACHE_TABLE;
+if (!CACHE_TABLE) throw new Error("CACHE_TABLE environment variable not defined");
 
 // Configuration constants matching React app
 const MAX_RETRY_PAGES = 1;
