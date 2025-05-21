@@ -10,7 +10,7 @@ import axios from 'axios';
 const docClient = new DynamoDB.DocumentClient();
 const CACHE_TABLE = process.env.CACHE_TABLE!;
 
-// Configuration constants matching your React app
+// Configuration constants matching React app
 const DEBUG = true;
 const MAX_RETRY_PAGES = 1;
 const DOCUMENTARY_GENRE_ID = 99;
