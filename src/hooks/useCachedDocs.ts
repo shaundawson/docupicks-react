@@ -1,12 +1,20 @@
 import { useEffect, useState } from 'react';
-import { API } from 'aws-amplify';
-import { Movie } from '../types';
+// Import the modular Amplify API client
+import { API } from '@aws-amplify/api';
+import type { Movie } from '../types';
 import { FALLBACK_MOVIES } from '../fallbackMovies';
 
-const CACHE_DURATION = 12 * 60 * 60 * 1000; // 12 hours
+// How long to cache data in localStorage (12 hours)
+const CACHE_DURATION = 12 * 60 * 60 * 1000;
 const CACHE_KEY = 'docupicks-cache';
 const CACHE_TIME_KEY = `${CACHE_KEY}-time`;
 
+/**
+ * Custom React hook to load and cache documentary data.
+ * - Tries to load from localStorage cache first.
+ * - Falls back to AWS Amplify API if cache is expired or missing.
+ * - If both fail, uses a static fallback list.
+ */
 export function useCachedDocs() {
     const [data, setData] = useState<Movie[]>([]);
     const [loading, setLoading] = useState(true);
@@ -15,7 +23,7 @@ export function useCachedDocs() {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                // Try to read from localStorage first
+                // 1. Try to read from localStorage cache
                 const cachedData = localStorage.getItem(CACHE_KEY);
                 const cacheTime = localStorage.getItem(CACHE_TIME_KEY);
 
@@ -25,7 +33,8 @@ export function useCachedDocs() {
                     return;
                 }
 
-                // Fetch from AWS Amplify API
+                // 2. Try to fetch from AWS Amplify API
+                // NOTE: This will fail locally unless your Amplify backend is running and env vars are set
                 const freshData: Movie[] = await API.get('docupicksApi', '/cache', {});
 
                 // Validate response structure
@@ -33,12 +42,12 @@ export function useCachedDocs() {
                     throw new Error('Invalid API response format');
                 }
 
-                // Update cache
+                // Save to cache
                 localStorage.setItem(CACHE_KEY, JSON.stringify(freshData));
                 localStorage.setItem(CACHE_TIME_KEY, Date.now().toString());
                 setData(freshData);
-
             } catch (err) {
+                // If API fails, log and fall back to cache or static data
                 handleError(err);
                 attemptFallbackRecovery();
             } finally {
@@ -47,26 +56,68 @@ export function useCachedDocs() {
         };
 
         fetchData();
+        // Only run once on mount
+        // eslint-disable-next-line
     }, []);
 
+    /**
+     * Handles errors by logging and updating error state.
+     */
     const handleError = (err: unknown) => {
         const message = err instanceof Error ? err.message : 'Failed to load documentaries';
         console.error('Caching Error:', message);
         setError(message);
     };
 
+    /**
+     * Attempts to recover from failure by using cached or fallback static data.
+     */
     const attemptFallbackRecovery = () => {
         try {
             const cachedData = localStorage.getItem(CACHE_KEY);
             if (cachedData) {
                 setData(JSON.parse(cachedData));
             } else {
-                setData(FALLBACK_MOVIES);
+                // If no cache, use static fallback movies (titles only)
+                // These may not have full Movie fields, so downstream code should handle gracefully
+                setData(
+                    FALLBACK_MOVIES.map(title => ({
+                        Title: title,
+                        Year: '',
+                        Rated: '',
+                        Released: '',
+                        Runtime: '',
+                        Genre: '',
+                        Director: '',
+                        Writer: '',
+                        Actors: '',
+                        Plot: '',
+                        Language: '',
+                        Country: '',
+                        Awards: '',
+                        Poster: '',
+                        tmdbId: undefined,
+                        wikipediaUrl: undefined,
+                        budget: undefined,
+                        Ratings: [],
+                        WatchProviders: [],
+                        Metascore: '',
+                        imdbRating: '',
+                        imdbVotes: '',
+                        imdbID: '',
+                        Type: '',
+                        DVD: '',
+                        BoxOffice: '',
+                        Production: '',
+                        Website: '',
+                        Response: '',
+                    }))
+                );
                 console.warn('Using fallback data');
             }
         } catch (cacheErr) {
             console.error('Cache recovery failed:', cacheErr);
-            setData(FALLBACK_MOVIES);
+            setData([]);
         }
     };
 
