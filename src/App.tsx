@@ -233,6 +233,162 @@ async function validateMovie(tmdbMovie: TMDBMovie): Promise<MovieDetails | null>
   }
 }
 
+// // Load and validate movies from TMDB and OMDB
+// async function loadMovies() {
+//   try {
+//     let page = 1;
+//     const movies: TMDBMovie[] = [];
+//     const uniqueTitles = new Set<string>();
+
+//     // Get keyword IDs using imported KEYWORDS
+//     const keywordIds = await Promise.all(KEYWORDS.map(getKeywordId));
+//     const validKeywordIds = keywordIds.filter(id => id !== null).join('|');
+
+//     // // Debug: Enhanced debugging for TMDB queries
+//     // DEBUG && console.debug('🔧 TMDB Query Parameters:', {
+//     //   genre: DOCUMENTARY_GENRE_ID,
+//     //   keywords: validKeywordIds,
+//     //   minYear: MIN_YEAR,
+//     //   maxYear: MAX_YEAR,
+//     //   pagesToQuery: MAX_RETRY_PAGES
+//     // });
+
+//     // Fetch movies across multiple pages until enough valid ones are found or max pages hit
+//     while (movies.length < TOP_MOVIES_LIMIT && page <= MAX_RETRY_PAGES) {
+//       const pageResults = await fetchDocumentaries(page, validKeywordIds);
+
+//       // Debug: Log raw TMDB results with actual page number
+//       DEBUG && console.debug(`📦 Raw TMDB Results (Page ${page}):`, {
+//         count: pageResults.length,
+//         titles: pageResults.map(m => m.title),
+//         apiUrl: `https://api.themoviedb.org/3/discover/movie?${new URLSearchParams({
+//           with_genres: DOCUMENTARY_GENRE_ID.toString(),
+//           with_keywords: validKeywordIds,
+//           page: page.toString(),
+//         })}`
+//       });
+
+//       // Process keyword results first
+//       const newKeywordMovies = pageResults.filter(movie => {
+//         const movieYear = parseInt(movie.release_date?.split('-')[0] || '0');
+//         return !uniqueTitles.has(movie.title) && movieYear >= MIN_YEAR && movieYear <= MAX_YEAR;
+//       });
+
+//       // If no keyword results, try fallback
+//       if (newKeywordMovies.length === 0) {
+//         DEBUG && console.warn('⚠️ No keyword results - trying broader search');
+//         const fallbackResults = await fetchDocumentaries(page);
+//         newKeywordMovies.push(...fallbackResults.filter(movie =>
+//           !uniqueTitles.has(movie.title) &&
+//           parseInt(movie.release_date?.split('-')[0] || '0') >= MIN_YEAR
+//         ));
+//       }
+
+//       newKeywordMovies.forEach(movie => uniqueTitles.add(movie.title));
+//       movies.push(...newKeywordMovies);
+//       page++;
+//     }
+
+//     // Debug: Final movie candidates before validation
+//     DEBUG && console.debug('🎬 Movies for Validation:', {
+//       count: movies.length,
+//       titles: movies.map(m => m.title)
+//     });
+
+//     const batchSize = 5; // Control batch size for OMDB requests
+//     const validated: MovieDetails[] = [];
+
+//     // Validate movies in batches to avoid OMDB rate limits
+//     for (let i = 0; i < movies.length; i += batchSize) {
+//       const batch = movies.slice(i, i + batchSize);
+//       const results = await Promise.all(batch.map(validateMovie));
+//       validated.push(...results.filter(Boolean) as MovieDetails[]);
+//       await new Promise(resolve => setTimeout(resolve, OMDB_DELAY));
+//     }
+
+//     // If validation fails completely, fall back to predefined movies
+//     if (validated.length < TOP_MOVIES_LIMIT) {
+//       DEBUG && console.warn(`⚠️ Partial validation (${validated.length}/${TOP_MOVIES_LIMIT}) - supplementing`);
+
+//       const needed = TOP_MOVIES_LIMIT - validated.length;
+//       const fallbackResults = await Promise.all(
+//         FALLBACK_MOVIES.slice(0, needed).map(title =>
+//           axios.get(`https://www.omdbapi.com/?t=${title}&apikey=${import.meta.env.VITE_OMDB_API_KEY}`)
+//         )
+//       );
+
+//       const validFallbacks = fallbackResults
+//         .map(res => res.data)
+//         .filter(movie => movie.Response === 'True');
+
+//       // START OF MODIFIED FALLBACK HANDLING
+//       const processedFallbacks = await Promise.all(
+//         validFallbacks.map(async (omdbMovie) => {
+//           try {
+//             // Get TMDB ID using IMDb ID from OMDB
+//             const tmdbFindResponse = await axios.get(
+//               `https://api.themoviedb.org/3/find/${omdbMovie.imdbID}`,
+//               {
+//                 params: {
+//                   api_key: import.meta.env.VITE_TMDB_API_KEY,
+//                   external_source: 'imdb_id',
+//                 },
+//               }
+//             );
+
+//             const tmdbMovie = tmdbFindResponse.data.movie_results[0];
+//             if (!tmdbMovie) {
+//               DEBUG && console.warn(`No TMDB movie found for IMDb ID ${omdbMovie.imdbID}`);
+//               return null;
+//             }
+
+//             // Get watch providers from TMDB
+//             const providersResponse = await axios.get(
+//               `https://api.themoviedb.org/3/movie/${tmdbMovie.id}/watch/providers`,
+//               { params: { api_key: import.meta.env.VITE_TMDB_API_KEY } }
+//             );
+
+//             const watchProviders = providersResponse.data.results?.US?.flatrate || [];
+
+//             // Create complete movie object
+//             return {
+//               ...omdbMovie,
+//               imdbRating: omdbMovie.imdbRating,
+//               Year: omdbMovie.Year,
+//               Genre: omdbMovie.Genre,
+//               Poster: omdbMovie.Poster !== 'N/A' ? omdbMovie.Poster : '/placeholder.jpg',
+//               tmdbId: tmdbMovie.id,
+//               WatchProviders: watchProviders.map((p: any) => ({
+//                 id: p.provider_id,
+//                 name: p.provider_name,
+//                 logo_path: p.logo_path,
+//               })),
+//             } as MovieDetails;
+//           } catch (error) {
+//             console.error(`Error processing fallback movie ${omdbMovie.Title}:`, error);
+//             return null;
+//           }
+//         })
+//       );
+
+//       const validProcessedFallbacks = processedFallbacks.filter(Boolean) as MovieDetails[];
+//       // END OF MODIFIED FALLBACK HANDLING
+
+//       return [...validated, ...validProcessedFallbacks]
+//         .sort((a, b) => parseFloat(b.imdbRating) - parseFloat(a.imdbRating))
+//         .slice(0, TOP_MOVIES_LIMIT);
+//     }
+
+//     // Return top-rated documentaries
+//     return validated
+//       .sort((a, b) => parseFloat(b.imdbRating) - parseFloat(a.imdbRating))
+//       .slice(0, TOP_MOVIES_LIMIT);
+//   } catch (error) {
+//     console.error('Movie loading failed:', error);
+//     return [];
+//   }
+// }
+
 // Root App component
 function App() {
   const [isDarkTheme, setIsDarkTheme] = useState(true); // Theme toggle state
