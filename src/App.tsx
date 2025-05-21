@@ -7,12 +7,15 @@ import Grow from '@mui/material/Grow';
 import { Header } from './components/Header';
 import { MovieCard } from './components/MovieCard';
 import { Footer } from './components/Footer';
-import type { Movie } from './types';
 import './App.css';
 import { ThemeProvider } from '@mui/material/styles';
 import { imdbDarkTheme, imdbLightTheme } from './theme';
 import { KEYWORDS } from './keywords';
 import { useCachedDocs } from './hooks/useCachedDocs'; //  Caching hook
+
+import { Amplify } from 'aws-amplify';
+import awsconfig from './aws-exports';
+Amplify.configure(awsconfig);
 
 // Root App component
 function App() {
