@@ -48,7 +48,7 @@ async function getKeywordId(keyword: string): Promise<number | null> {
     try {
         const response = await axios.get('https://api.themoviedb.org/3/search/keyword', {
             params: {
-                api_key: process.env.VITE_TMDB_API_KEY,
+                api_key: process.env.TMDB_API_KEY,
                 query: keyword,
             },
         });
@@ -62,7 +62,7 @@ async function getKeywordId(keyword: string): Promise<number | null> {
 async function fetchDocumentaries(page: number, keywordIds?: string): Promise<TMDBMovie[]> {
     try {
         const params: any = {
-            api_key: process.env.VITE_TMDB_API_KEY,
+            api_key: process.env.TMDB_API_KEY,
             with_genres: DOCUMENTARY_GENRE_ID,
             sort_by: 'rating.desc',
             'vote_count.gte': 10,
@@ -99,7 +99,7 @@ async function validateMovie(tmdbMovie: TMDBMovie): Promise<MovieDetails | null>
                 t: tmdbMovie.title,
                 y: releaseYear,
                 type: 'movie',
-                apikey: process.env.VITE_OMDB_API_KEY
+                apikey: process.env.OMDB_API_KEY
             }
         });
 
@@ -118,7 +118,7 @@ async function validateMovie(tmdbMovie: TMDBMovie): Promise<MovieDetails | null>
 
         const providersResponse = await axios.get(
             `https://api.themoviedb.org/3/movie/${tmdbMovie.id}/watch/providers`,
-            { params: { api_key: process.env.VITE_TMDB_API_KEY } }
+            { params: { api_key: process.env.TMDB_API_KEY } }
         );
 
         return {
