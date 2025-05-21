@@ -4,6 +4,7 @@ export type AmplifyDependentResourcesAttributes = {
       "Arn": "string",
       "CloudWatchEventRule": "string",
       "LambdaExecutionRole": "string",
+      "LambdaExecutionRoleArn": "string",
       "Name": "string",
       "Region": "string"
     },
@@ -11,12 +12,14 @@ export type AmplifyDependentResourcesAttributes = {
       "Arn": "string",
       "CloudWatchEventRule": "string",
       "LambdaExecutionRole": "string",
+      "LambdaExecutionRoleArn": "string",
       "Name": "string",
       "Region": "string"
     },
     "DocuPicksCacheTriggerf58675b6": {
       "Arn": "string",
       "LambdaExecutionRole": "string",
+      "LambdaExecutionRoleArn": "string",
       "Name": "string",
       "Region": "string"
     }
