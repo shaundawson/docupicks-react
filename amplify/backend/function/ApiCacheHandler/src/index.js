@@ -142,6 +142,9 @@ async function validateMovie(tmdbMovie: TMDBMovie): Promise<MovieDetails | null>
 
 export const handler = async () => {
     try {
+        if (!process.env.TMDB_API_KEY || !process.env.OMDB_API_KEY || !process.env.KEYWORDS) {
+            throw new Error("Missing required environment variables");
+        }
         const cacheKey = `DOCS-${new Date().toISOString().split('T')[0]}`;
 
         // Check cache first
@@ -196,12 +199,20 @@ export const handler = async () => {
 
         return {
             statusCode: 200,
+            headers: {
+                "Access-Control-Allow-Origin": "*",
+                "Content-Type": "application/json"
+            },
             body: JSON.stringify(sortedMovies),
         };
     } catch (error) {
         console.error('Lambda error:', error);
         return {
             statusCode: 500,
+            headers: {
+                "Access-Control-Allow-Origin": "*",
+                "Content-Type": "application/json"
+            },
             body: JSON.stringify({ error: 'Failed to load movies' }),
         };
     }
