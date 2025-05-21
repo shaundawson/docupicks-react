@@ -159,7 +159,6 @@ function App() {
             }}
           >
             {movies.map((movie, idx) => (
-              // Use a robust, always-unique key: prefer imdbID-tmdbId, fallback to Title+idx
               <Box
                 key={
                   movie.imdbID && movie.tmdbId
