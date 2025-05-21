@@ -12,4 +12,7 @@ export default defineConfig({
     global: 'window',
     'process.env': {},
   },
+  build: {
+    outDir: 'build', // <-- This is the key line
+  },
 });
