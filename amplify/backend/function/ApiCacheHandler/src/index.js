@@ -3,8 +3,8 @@
     REGION
     CACHE_TABLE
 Amplify Params - DO NOT EDIT */
-import { DynamoDB } from 'aws-sdk';
-import axios from 'axios';
+const { DynamoDB } = require('aws-sdk');
+const axios = require('axios');
 
 const docClient = new DynamoDB.DocumentClient();
 const CACHE_TABLE = process.env.CACHE_TABLE!;
