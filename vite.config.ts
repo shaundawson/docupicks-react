@@ -13,6 +13,6 @@ export default defineConfig({
     'process.env': {},
   },
   build: {
-    outDir: 'build', // <-- This is the key line
+    outDir: 'build', //
   },
 });
