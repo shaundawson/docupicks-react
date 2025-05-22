@@ -1,3 +1,21 @@
+/**
+ * FALLBACK_MOVIES
+ * ---------------
+ * This constant array contains a curated list of essential documentaries related to racial justice,
+ * police reform, systemic racism, and African American history in the United States.
+ *
+ * Purpose:
+ * - Used as a fallback source of documentary titles when external APIs (TMDB/OMDB) are unavailable or fail.
+ * - Ensures the app can always display a meaningful selection of important films, even during outages.
+ *
+ * Usage:
+ * - Import and reference FALLBACK_MOVIES in any component or service that needs a reliable set of documentary titles.
+ * - The array is marked as 'const' to guarantee immutability and type safety.
+ *
+ * Maintainers:
+ * - Please update this list thoughtfully, preserving its focus on the app's core themes.
+ */
+
 export const FALLBACK_MOVIES = [
     'I am not your negro',
     'I Got a Monster',
