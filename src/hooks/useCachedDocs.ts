@@ -26,31 +26,51 @@ export function useCachedDocs() {
                 // 1. Try to read from localStorage cache
                 const cachedData = localStorage.getItem(CACHE_KEY);
                 const cacheTime = localStorage.getItem(CACHE_TIME_KEY);
+                const cacheAge = cacheTime ? Date.now() - parseInt(cacheTime) : null;
+                
+                console.debug('[Cache Check]', {
+                    hasCache: !!cachedData,
+                    cacheAge: cacheAge ? `${Math.round(cacheAge / 1000)}s ago` : 'N/A',
+                    isValid: cacheAge ? cacheAge < CACHE_DURATION : false
+                });
 
-                if (cachedData && cacheTime && Date.now() - parseInt(cacheTime) < CACHE_DURATION) {
-                    setData(JSON.parse(cachedData));
+                if (cachedData && cacheTime && cacheAge < CACHE_DURATION) {
+                    console.debug('[Cache Load] Using cached data');
+                    const parsedData = JSON.parse(cachedData);
+                    console.debug(`[Cache Load] Parsed ${parsedData.length} items`);
+                    setData(parsedData);
                     setLoading(false);
                     return;
                 }
 
                 // 2. Try to fetch from AWS Amplify API
                 // NOTE: This will fail locally unless your Amplify backend is running and env vars are set
+                console.debug('[API Fetch] Initiating API request to /cache');
                 const freshData: Movie[] = await API.get('docupicksApi', '/cache', {});
+                console.debug('[API Response] Received data:', {
+                    count: freshData.length,
+                    sample: freshData.slice(0, 3) // Log first 3 items for validation
+                });
 
                 // Validate response structure
                 if (!Array.isArray(freshData)) {
+                    console.error('[Validation] Invalid API response structure:', freshData);
                     throw new Error('Invalid API response format');
                 }
 
                 // Save to cache
+                console.debug(`[Cache Update] Storing ${freshData.length} items`);
                 localStorage.setItem(CACHE_KEY, JSON.stringify(freshData));
                 localStorage.setItem(CACHE_TIME_KEY, Date.now().toString());
                 setData(freshData);
+                console.debug('[API Success] Data updated from fresh API response');
             } catch (err) {
                 // If API fails, log and fall back to cache or static data
+                console.error('[Fetch Error] Main fetch flow failed:', err);
                 handleError(err);
                 attemptFallbackRecovery();
             } finally {
+                console.debug('[Loading State] Setting loading to false');
                 setLoading(false);
             }
         };
@@ -64,8 +84,12 @@ export function useCachedDocs() {
      * Handles errors by logging and updating error state.
      */
     const handleError = (err: unknown) => {
-        const message = err instanceof Error ? err.message : 'Failed to load documentaries';
-        console.error('Caching Error:', message);
+        const message = err instanceof Error ? err.message : 'Unknown error occurred';
+        const stack = err instanceof Error ? err.stack : undefined;
+        console.error('[Error Handler]', {
+            message,
+            stackTrace: stack
+        });
         setError(message);
     };
 
@@ -73,15 +97,23 @@ export function useCachedDocs() {
      * Attempts to recover from failure by using cached or fallback static data.
      */
     const attemptFallbackRecovery = () => {
+        console.debug('[Fallback] Attempting recovery');
         try {
             const cachedData = localStorage.getItem(CACHE_KEY);
             if (cachedData) {
-                setData(JSON.parse(cachedData));
+                try {
+                    const parsedData = JSON.parse(cachedData);
+                    console.debug(`[Fallback] Using expired cache with ${parsedData.length} items`);
+                    setData(parsedData);
+                } catch (parseError) {
+                    console.error('[Fallback] Cache parse failed:', parseError);
+                    throw new Error('Corrupted cache data');
+                }
             } else {
                 // If no cache, use static fallback movies (titles only)
                 // These may not have full Movie fields, so downstream code should handle gracefully
-                setData(
-                    FALLBACK_MOVIES.map(title => ({
+                console.warn('[Fallback] No cache available, using static fallback');
+                const fallbackData = FALLBACK_MOVIES.map(title => ({
                         Title: title,
                         Year: '',
                         Rated: '',
@@ -111,12 +143,12 @@ export function useCachedDocs() {
                         Production: '',
                         Website: '',
                         Response: '',
-                    }))
-                );
-                console.warn('Using fallback data');
+                    }));
+                console.debug(`[Fallback] Generated ${fallbackData.length} fallback items`);
+                setData(fallbackData);
             }
         } catch (cacheErr) {
-            console.error('Cache recovery failed:', cacheErr);
+            console.error('[Fallback] Recovery failed:', cacheErr);
             setData([]);
         }
     };
