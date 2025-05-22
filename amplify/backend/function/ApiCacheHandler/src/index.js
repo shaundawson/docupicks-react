@@ -18,32 +18,7 @@ const OMDB_DELAY = 500;
 const MIN_YEAR = 2000;
 const MAX_YEAR = 2025;
 
-interface TMDBMovie {
-    id: number;
-    title: string;
-    release_date: string;
-    overview: string;
-}
-
-interface MovieDetails {
-    imdbID: string;
-    Title: string;
-    Year: string;
-    Genre: string;
-    imdbRating: string;
-    Poster: string;
-    Plot: string;
-    Runtime: string;
-    Director: string;
-    tmdbId: number;
-    WatchProviders: Array<{
-        id: number;
-        name: string;
-        logo_path: string;
-    }>;
-}
-
-async function getKeywordId(keyword: string): Promise<number | null> {
+async function getKeywordId(keyword) {
     try {
         const response = await axios.get('https://api.themoviedb.org/3/search/keyword', {
             params: {
@@ -58,9 +33,9 @@ async function getKeywordId(keyword: string): Promise<number | null> {
     }
 }
 
-async function fetchDocumentaries(page: number, keywordIds?: string): Promise<TMDBMovie[]> {
+async function fetchDocumentaries(page, keywordIds) {
     try {
-        const params: any = {
+        const params = {
             api_key: process.env.TMDB_API_KEY,
             with_genres: DOCUMENTARY_GENRE_ID,
             sort_by: 'rating.desc',
@@ -78,7 +53,7 @@ async function fetchDocumentaries(page: number, keywordIds?: string): Promise<TM
         if (keywordIds) params.with_keywords = keywordIds;
 
         const response = await axios.get('https://api.themoviedb.org/3/discover/movie', { params });
-        return response.data.results.map((movie: any) => ({
+        return response.data.results.map(movie => ({
             id: movie.id,
             title: movie.title,
             release_date: movie.release_date,
@@ -90,7 +65,7 @@ async function fetchDocumentaries(page: number, keywordIds?: string): Promise<TM
     }
 }
 
-async function validateMovie(tmdbMovie: TMDBMovie): Promise<MovieDetails | null> {
+async function validateMovie(tmdbMovie) {
     try {
         const releaseYear = tmdbMovie.release_date?.split('-')[0] || '';
         const omdbResponse = await axios.get(`https://www.omdbapi.com/`, {
@@ -127,7 +102,7 @@ async function validateMovie(tmdbMovie: TMDBMovie): Promise<MovieDetails | null>
             Genre: omdbResponse.data.Genre,
             Poster: omdbResponse.data.Poster !== 'N/A' ? omdbResponse.data.Poster : '/placeholder.jpg',
             tmdbId: tmdbMovie.id,
-            WatchProviders: providersResponse.data.results?.US?.flatrate?.map((p: any) => ({
+            WatchProviders: providersResponse.data.results?.US?.flatrate?.map(p => ({
                 id: p.provider_id,
                 name: p.provider_name,
                 logo_path: p.logo_path
@@ -139,7 +114,7 @@ async function validateMovie(tmdbMovie: TMDBMovie): Promise<MovieDetails | null>
     }
 }
 
-export const handler = async () => {
+exports.handler = async () => {
     try {
         if (!process.env.TMDB_API_KEY || !process.env.OMDB_API_KEY || !process.env.KEYWORDS) {
             throw new Error("Missing required environment variables");
@@ -155,13 +130,17 @@ export const handler = async () => {
         if (cached.Item) {
             return {
                 statusCode: 200,
+                headers: {
+                    "Access-Control-Allow-Origin": "*",
+                    "Content-Type": "application/json"
+                },
                 body: JSON.stringify(cached.Item.data),
             };
         }
 
         // Fetch fresh data
         let page = 1;
-        const movies: TMDBMovie[] = [];
+        const movies = [];
         const keywordIds = (await Promise.all(process.env.KEYWORDS.split(',').map(getKeywordId))).filter(id => id !== null).join('|');
 
         while (movies.length < TOP_MOVIES_LIMIT && page <= MAX_RETRY_PAGES) {
@@ -174,11 +153,11 @@ export const handler = async () => {
         }
 
         // Validate movies
-        const validated: MovieDetails[] = [];
+        const validated = [];
         for (let i = 0; i < movies.length; i += 5) {
             const batch = movies.slice(i, i + 5);
             const results = await Promise.all(batch.map(validateMovie));
-            validated.push(...results.filter(Boolean) as MovieDetails[]);
+            validated.push(...results.filter(Boolean));
             await new Promise(resolve => setTimeout(resolve, OMDB_DELAY));
         }
 
