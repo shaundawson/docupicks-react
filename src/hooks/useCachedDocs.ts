@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react';
-// Import the modular Amplify API client
 import { API } from '@aws-amplify/api';
 import type { Movie } from '../types';
 import { FALLBACK_MOVIES } from '../fallbackMovies';
@@ -8,8 +7,6 @@ import { FALLBACK_MOVIES } from '../fallbackMovies';
 const CACHE_DURATION = 12 * 60 * 60 * 1000;
 const CACHE_KEY = 'docupicks-cache';
 const CACHE_TIME_KEY = `${CACHE_KEY}-time`;
-
-console.log('Cache Table Name:', process.env.REACT_APP_CACHE_TABLE);
 
 /**
  * Custom React hook to load and cache documentary data.
@@ -29,7 +26,7 @@ export function useCachedDocs() {
                 const cachedData = localStorage.getItem(CACHE_KEY);
                 const cacheTime = localStorage.getItem(CACHE_TIME_KEY);
                 const cacheAge = cacheTime ? Date.now() - parseInt(cacheTime) : null;
-                
+
                 console.debug('[Cache Check]', {
                     hasCache: !!cachedData,
                     cacheAge: cacheAge ? `${Math.round(cacheAge / 1000)}s ago` : 'N/A',
@@ -46,12 +43,11 @@ export function useCachedDocs() {
                 }
 
                 // 2. Try to fetch from AWS Amplify API
-                // NOTE: This will fail locally unless your Amplify backend is running and env vars are set
                 console.debug('[API Fetch] Initiating API request to /cache');
                 const freshData: Movie[] = await API.get('docupicksApi', '/cache', {});
                 console.debug('[API Response] Received data:', {
                     count: freshData.length,
-                    sample: freshData.slice(0, 3) // Log first 3 items for validation
+                    sample: freshData.slice(0, 3)
                 });
 
                 // Validate response structure

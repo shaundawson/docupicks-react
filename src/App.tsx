@@ -23,7 +23,8 @@ Amplify.configure({
       {
         name: "docupicksApi",
         endpoint: "https://3oz8vqqgwh.execute-api.us-east-1.amazonaws.com/v1",
-        region: "us-east-1"
+        region: "us-east-1",
+        authorizationType: "NONE"
       }
     ]
   }
