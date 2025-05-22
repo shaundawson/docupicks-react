@@ -9,6 +9,8 @@ const CACHE_DURATION = 12 * 60 * 60 * 1000;
 const CACHE_KEY = 'docupicks-cache';
 const CACHE_TIME_KEY = `${CACHE_KEY}-time`;
 
+console.log('Cache Table Name:', process.env.REACT_APP_CACHE_TABLE);
+
 /**
  * Custom React hook to load and cache documentary data.
  * - Tries to load from localStorage cache first.
