@@ -15,7 +15,19 @@ import { useCachedDocs } from './hooks/useCachedDocs'; //  Caching hook
 
 import { Amplify } from 'aws-amplify';
 import awsconfig from './aws-exports';
-Amplify.configure(awsconfig);
+
+Amplify.configure({
+  ...awsconfig,
+  API: {
+    endpoints: [
+      {
+        name: 'docupicksApi',
+        endpoint: 'https://d3qsrcktrgs5vc.execute-api.us-east-1.amazonaws.com/stage',
+        region: 'us-east-1'
+      }
+    ]
+  }
+});
 
 // Root App component
 function App() {
