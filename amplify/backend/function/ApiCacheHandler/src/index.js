@@ -18,23 +18,35 @@ const OMDB_DELAY = 500;
 const MIN_YEAR = 2000;
 const MAX_YEAR = 2025;
 
+// Environment variable validation at cold start
+console.log('Initializing with environment variables:', {
+    TMDB_API_KEY: process.env.TMDB_API_KEY ? '***' : 'MISSING',
+    OMDB_API_KEY: process.env.OMDB_API_KEY ? '***' : 'MISSING',
+    KEYWORDS: process.env.KEYWORDS || 'MISSING',
+    CACHE_TABLE: CACHE_TABLE || 'MISSING'
+});
+
 async function getKeywordId(keyword) {
     try {
+        console.log(`Fetching keyword ID for: ${keyword}`);
         const response = await axios.get('https://api.themoviedb.org/3/search/keyword', {
             params: {
                 api_key: process.env.TMDB_API_KEY,
                 query: keyword,
             },
         });
-        return response.data.results[0]?.id || null;
+        const keywordId = response.data.results[0]?.id || null;
+        console.log(`Keyword ID for ${keyword}: ${keywordId}`);
+        return keywordId;
     } catch (error) {
-        console.error(`Error fetching keyword ID for ${keyword}:`, error);
+        console.error(`Error fetching keyword ID for ${keyword}:`, error.response?.data || error.message);
         return null;
     }
 }
 
 async function fetchDocumentaries(page, keywordIds) {
     try {
+        console.log(`Fetching documentaries page ${page} with keywords: ${keywordIds}`);
         const params = {
             api_key: process.env.TMDB_API_KEY,
             with_genres: DOCUMENTARY_GENRE_ID,
@@ -53,6 +65,7 @@ async function fetchDocumentaries(page, keywordIds) {
         if (keywordIds) params.with_keywords = keywordIds;
 
         const response = await axios.get('https://api.themoviedb.org/3/discover/movie', { params });
+        console.log(`Found ${response.data.results.length} movies on page ${page}`);
         return response.data.results.map(movie => ({
             id: movie.id,
             title: movie.title,
@@ -60,14 +73,16 @@ async function fetchDocumentaries(page, keywordIds) {
             overview: movie.overview
         }));
     } catch (error) {
-        console.error('TMDB API Error:', error);
+        console.error('TMDB API Error:', error.response?.data || error.message);
         return [];
     }
 }
 
 async function validateMovie(tmdbMovie) {
     try {
+        console.log(`Validating movie: ${tmdbMovie.title}`);
         const releaseYear = tmdbMovie.release_date?.split('-')[0] || '';
+
         const omdbResponse = await axios.get(`https://www.omdbapi.com/`, {
             params: {
                 t: tmdbMovie.title,
@@ -77,10 +92,18 @@ async function validateMovie(tmdbMovie) {
             }
         });
 
-        if (omdbResponse.data.Response !== 'True') return null;
+        console.log(`OMDB response for ${tmdbMovie.title}:`, omdbResponse.data.Response);
+
+        if (omdbResponse.data.Response !== 'True') {
+            console.log(`Skipping ${tmdbMovie.title} - OMDB response false`);
+            return null;
+        }
 
         const movieYear = parseInt(omdbResponse.data.Year || releaseYear);
-        if (movieYear < MIN_YEAR || movieYear > MAX_YEAR) return null;
+        if (movieYear < MIN_YEAR || movieYear > MAX_YEAR) {
+            console.log(`Skipping ${tmdbMovie.title} - Year ${movieYear} out of range`);
+            return null;
+        }
 
         const isDocumentary = [
             omdbResponse.data.Genre?.toLowerCase(),
@@ -88,13 +111,17 @@ async function validateMovie(tmdbMovie) {
             tmdbMovie.overview?.toLowerCase()
         ].some(text => text?.includes('documentary') || text?.includes('docu'));
 
-        if (!isDocumentary || omdbResponse.data.imdbRating === 'N/A') return null;
+        if (!isDocumentary || omdbResponse.data.imdbRating === 'N/A') {
+            console.log(`Skipping ${tmdbMovie.title} - Not documentary or missing rating`);
+            return null;
+        }
 
         const providersResponse = await axios.get(
             `https://api.themoviedb.org/3/movie/${tmdbMovie.id}/watch/providers`,
             { params: { api_key: process.env.TMDB_API_KEY } }
         );
 
+        console.log(`Successfully validated ${tmdbMovie.title}`);
         return {
             ...omdbResponse.data,
             imdbRating: omdbResponse.data.imdbRating,
@@ -109,25 +136,32 @@ async function validateMovie(tmdbMovie) {
             })) || []
         };
     } catch (error) {
-        console.error(`Validation failed for ${tmdbMovie.title}:`, error);
+        console.error(`Validation failed for ${tmdbMovie.title}:`, error.response?.data || error.message);
         return null;
     }
 }
 
 exports.handler = async () => {
     try {
+        console.log('---------- STARTING LAMBDA EXECUTION ----------');
+
+        // Environment check
         if (!process.env.TMDB_API_KEY || !process.env.OMDB_API_KEY || !process.env.KEYWORDS) {
             throw new Error("Missing required environment variables");
         }
+
         const cacheKey = `DOCS-${new Date().toISOString().split('T')[0]}`;
+        console.log(`Using cache key: ${cacheKey}`);
 
         // Check cache first
+        console.log('Checking cache...');
         const cached = await docClient.get({
             TableName: CACHE_TABLE,
             Key: { id: cacheKey }
         }).promise();
 
         if (cached.Item) {
+            console.log('Cache hit - returning cached data');
             return {
                 statusCode: 200,
                 headers: {
@@ -137,43 +171,66 @@ exports.handler = async () => {
                 body: JSON.stringify(cached.Item.data),
             };
         }
+        console.log('Cache miss - fetching fresh data');
 
         // Fetch fresh data
         let page = 1;
         const movies = [];
-        const keywordIds = (await Promise.all(process.env.KEYWORDS.split(',').map(getKeywordId))).filter(id => id !== null).join('|');
+        const keywords = process.env.KEYWORDS.split(',');
+        console.log(`Processing keywords: ${keywords.join(', ')}`);
+
+        const keywordPromises = keywords.map(k => {
+            console.log(`Fetching keyword ID for: ${k}`);
+            return getKeywordId(k);
+        });
+
+        const keywordIds = (await Promise.all(keywordPromises))
+            .filter(id => id !== null)
+            .join('|');
+        console.log(`Resolved keyword IDs: ${keywordIds}`);
 
         while (movies.length < TOP_MOVIES_LIMIT && page <= MAX_RETRY_PAGES) {
+            console.log(`Fetching page ${page}`);
             const pageResults = await fetchDocumentaries(page, keywordIds);
-            movies.push(...pageResults.filter(movie => {
+            const filtered = pageResults.filter(movie => {
                 const movieYear = parseInt(movie.release_date?.split('-')[0] || '0');
                 return movieYear >= MIN_YEAR && movieYear <= MAX_YEAR;
-            }));
+            });
+            movies.push(...filtered);
+            console.log(`Page ${page} added ${filtered.length} movies (total: ${movies.length})`);
             page++;
         }
 
         // Validate movies
+        console.log(`Starting validation of ${movies.length} movies`);
         const validated = [];
         for (let i = 0; i < movies.length; i += 5) {
             const batch = movies.slice(i, i + 5);
+            console.log(`Validating batch ${i / 5 + 1} (movies ${i}-${i + 5})`);
             const results = await Promise.all(batch.map(validateMovie));
-            validated.push(...results.filter(Boolean));
+            const validResults = results.filter(Boolean);
+            validated.push(...validResults);
+            console.log(`Batch ${i / 5 + 1} validated: ${validResults.length} passed`);
             await new Promise(resolve => setTimeout(resolve, OMDB_DELAY));
         }
 
+        console.log(`Validation complete: ${validated.length} valid movies`);
         const sortedMovies = validated
             .sort((a, b) => parseFloat(b.imdbRating) - parseFloat(a.imdbRating))
             .slice(0, TOP_MOVIES_LIMIT);
+        console.log(`Sorted movies: ${sortedMovies.length} items`);
 
         // Cache results
+        console.log('Writing to cache...');
         await docClient.put({
             TableName: CACHE_TABLE,
             Item: {
                 id: cacheKey,
                 data: sortedMovies,
-                ttl: Math.floor(Date.now() / 1000) + 86400 // 24h TTL
+                ttl: Math.floor(Date.now() / 1000) + 86400
             }
         }).promise();
+        console.log('Cache update successful');
 
         return {
             statusCode: 200,
@@ -184,14 +241,22 @@ exports.handler = async () => {
             body: JSON.stringify(sortedMovies),
         };
     } catch (error) {
-        console.error('Lambda error:', error);
+        console.error('LAMBDA ERROR:', {
+            message: error.message,
+            stack: error.stack,
+            code: error.code,
+            response: error.response?.data
+        });
         return {
             statusCode: 500,
             headers: {
                 "Access-Control-Allow-Origin": "*",
                 "Content-Type": "application/json"
             },
-            body: JSON.stringify({ error: 'Failed to load movies' }),
+            body: JSON.stringify({
+                error: 'Failed to load movies',
+                details: process.env.NODE_ENV === 'production' ? undefined : error.message
+            }),
         };
     }
 };
