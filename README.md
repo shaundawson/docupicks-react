@@ -5,18 +5,23 @@
 [![MUI](https://img.shields.io/badge/MUI-5.14.18-%23007FFF)](https://mui.com/)
 [![AWS](https://img.shields.io/badge/AWS-%23FF9900.svg?logo=amazon-aws&logoColor=white)](https://aws.amazon.com)
 
-**A focused React/TypeScript documentary discovery platform** curating essential documentaries about racial justice, police reform, and African American history in America. Powered by TMDB and OMDB APIs with intelligent content validation.
+DocuPicks is a focused React/TypeScript platform for discovering essential documentaries about racial justice, police reform, and African American history in America.
+It combines intelligent curation with robust API integrations for a reliable, high-quality discovery experience.
 
 ![DocuPicks](docupicks.com)
 
-## Tech Stack Highlights
+## Frontend
 
 - **React 18** with TypeScript type safety
 - **Material-UI** modern component library
-- **Dual API integration** (TMDB + OMDB)
-- **AWS Hosting** (S3 + CloudFront CDN)
-- **Vite** build system for rapid development
-- **Responsive grid layouts** (1-4 columns)
+- **Vite** for fast development/build
+
+## Backend (AWS Amplify)
+
+- **REST API** (via AWS Lambda & API Gateway) for all data operations
+- **Amazon DynamoDB** for fast, scalable NoSQL storage of curated documentary data
+- **Amplify Hosting:** S3 + CloudFront CDN
+- **CI/CD:** Automated builds and deploys via Amplify Console
 
 ## Curated Focus Areas
 
@@ -38,23 +43,18 @@
 - 🛡️ Fallback to hand-picked classics when API fails  
 - ⚡ Intelligent batching and rate limiting  
 
-## AWS Hosting Architecture
-
-```mermaid
-graph TD
-  A[GitHub Repository] --> B[AWS Amplify CI/CD]
-  B --> C[S3 Bucket Storage]
-  C --> D[CloudFront CDN]
-  D --> E[Global Users]
-  B --> F[Auto-Invalidation]
-
-```
-
 ## Data Sources
 
 - **TMDB API** - Primary movie discovery and streaming providers
 - **OMDB API** - Detailed metadata validation
 - **The Movie Database** - Provider logos
+
+## How the Backend Works
+
+-	When you browse or search, the frontend calls a custom API built with AWS Lambda and API Gateway.
+- This API fetches and validates data from DynamoDB, ensuring only curated, high-quality documentaries are shown.
+-	Data is regularly refreshed and validated using batch jobs and Lambda triggers.
+- All backend infrastructure is managed as code with AWS Amplify, making it easy to evolve and scale.
 
 ## Installation
 
