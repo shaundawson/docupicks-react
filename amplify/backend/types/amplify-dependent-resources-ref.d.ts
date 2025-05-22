@@ -33,6 +33,14 @@ export type AmplifyDependentResourcesAttributes = {
       "Region": "string",
       "StreamArn": "string"
     },
+    "DocumentariesCache": {
+      "Arn": "string",
+      "Name": "string",
+      "PartitionKeyName": "string",
+      "PartitionKeyType": "string",
+      "Region": "string",
+      "StreamArn": "string"
+    },
     "DynamoDB": {
       "Arn": "string",
       "Name": "string",
