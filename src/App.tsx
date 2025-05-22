@@ -15,23 +15,15 @@ import { useCachedDocs } from './hooks/useCachedDocs'; //  Caching hook
 
 import { Amplify } from 'aws-amplify';
 import awsconfig from './aws-exports';
-import { Auth } from 'aws-amplify';
-
-
 
 Amplify.configure({
   ...awsconfig,
   API: {
     endpoints: [
       {
-        name: 'docupicksApi',
-        endpoint: 'https://3oz8vqqgwh.execute-api.us-east-1.amazonaws.com/stage',
-        region: 'us-east-1',
-        service: 'execute-api',
-        authorizationType: 'AWS_IAM',
-        custom_header: async () => ({
-          Authorization: `Bearer ${(await Auth.currentSession()).getIdToken().getJwtToken()}`
-        })
+        name: "docupicksApi",
+        endpoint: "https://3oz8vqqgwh.execute-api.us-east-1.amazonaws.com/v1",
+        region: "us-east-1"
       }
     ]
   }
