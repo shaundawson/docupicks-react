@@ -59,7 +59,7 @@ export const Header = ({ toggleTheme, isDarkTheme }: HeaderProps) => {
                             lineHeight: '56px',
                             textShadow: theme.palette.mode === 'dark'
                                 ? '0 1px 4px #000'
-                                : 'none', // Remove shadow in light mode for clarity
+                                : 'none', 
                             borderBottom: `2px solid ${theme.palette.primary.main}`,
                             display: 'inline-block',
                             pb: '2px'
