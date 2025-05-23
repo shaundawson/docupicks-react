@@ -9,8 +9,9 @@ const CACHE_DURATION = 12 * 60 * 60 * 1000;
 const CACHE_KEY = 'docupicks-cache';
 const CACHE_TIME_KEY = `${CACHE_KEY}-time`;
 
-// OMDB API key from environment variable (must be set in your .env file)
-const OMDB_API_KEY = process.env.REACT_APP_OMDB_API_KEY || '';
+// OMDB API key from environment variable
+// const OMDB_API_KEY = process.env.VITE_OMDB_API_KEY;
+const OMDB_API_KEY = import.meta.env.VITE_OMDB_API_KEY;
 
 /**
  * Fetch full movie details from OMDB by title
