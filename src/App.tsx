@@ -14,22 +14,9 @@ import { KEYWORDS } from './keywords';
 import { useCachedDocs } from './hooks/useCachedDocs'; //  Caching hook
 
 import { Amplify } from 'aws-amplify';
-import awsconfig from './aws-exports';
+import config from './amplifyConfig';
 
-Amplify.configure({
-  ...awsconfig,
-  API: {
-    endpoints: [
-      {
-        name: "docupicksApi",
-        endpoint: "https://3oz8vqqgwh.execute-api.us-east-1.amazonaws.com/v1",
-        region: "us-east-1",
-        authorizationType: "NONE",
-        service: "execute-api"
-      }
-    ]
-  }
-});
+Amplify.configure(config);
 
 // Root App component
 function App() {
@@ -40,6 +27,7 @@ function App() {
 
   // Use the custom hook to get movies, loading, and error state
   const { data: movies, loading, error } = useCachedDocs();
+
 
   // Animated keyword effect
   useEffect(() => {
