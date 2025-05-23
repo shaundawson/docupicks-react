@@ -1,76 +1,76 @@
-// Import the function needed to create a custom Material UI theme
 import { createTheme } from '@mui/material/styles';
 
-// Define a custom dark theme for the app
+// IMDB Gold color
+const imdbGold = '#f5c518';
+
 const imdbDarkTheme = createTheme({
     palette: {
-        // Use dark mode colors
         mode: 'dark',
         primary: {
-            main: '#000000',           // Main color used for primary elements (black)
-            contrastText: '#f5c518',   // Text color that contrasts with primary background
+            main: imdbGold,
+            contrastText: '#181818',
         },
         secondary: {
-            main: '#01b4e4',           // Color used for secondary elements (light blue)
+            main: '#01b4e4',
         },
         background: {
-            default: '#121212',        // Default background color
-            paper: '#000000',          // Background for components like cards and modals
+            default: '#181818',
+            paper: '#232323',
         },
         text: {
-            primary: '#ffffff',        // Main text color (white)
-            secondary: '#a3a3a3',      // Less important text color (gray)
+            primary: '#fff',
+            secondary: '#b3b3b3',
         },
+        divider: '#333',
     },
     typography: {
-        // Define font families and styles
         fontFamily: [
-            'Amazon Ember',            // Primary font
-            'Helvetica Neue',          // Fallback fonts
+            'Amazon Ember',
+            'Helvetica Neue',
             'Arial',
             'sans-serif',
         ].join(','),
         h6: {
-            fontWeight: 700,           // Bold heading style
+            fontWeight: 700,
             fontSize: '1.1rem',
         },
         body2: {
-            lineHeight: 1.4,           // Line spacing for body text
+            lineHeight: 1.4,
         },
+        button: {
+            fontWeight: 700,
+        }
     },
     components: {
-        // Customize styles for specific Material UI components
         MuiButton: {
             styleOverrides: {
                 root: {
-                    borderRadius: '20px',     // Rounded buttons
+                    borderRadius: '20px',
                     padding: '8px 20px',
-                    textTransform: 'none',    // Keep original text casing
+                    textTransform: 'none',
+                    fontWeight: 700,
+                },
+                containedPrimary: {
+                    backgroundColor: imdbGold,
+                    color: '#181818', // Black text on gold
+                    '&:hover': {
+                        backgroundColor: '#ffe066',
+                        color: '#181818',
+                    },
+                },
+                outlinedPrimary: {
+                    borderColor: imdbGold,
+                    color: imdbGold, // Gold text on transparent
+                    backgroundColor: 'transparent',
+                    '&:hover': {
+                        backgroundColor: 'rgba(245,197,24,0.10)',
+                        color: imdbGold,
+                    },
                 },
                 textPrimary: {
-                    color: '#f5c518', // Force white text for text buttons
+                    color: imdbGold, // Gold text for text buttons
                     '&:hover': {
-                        backgroundColor: 'rgba(204, 174, 74, 0.1)', // Subtle hover effect
-                    },
-                },
-            },
-        },
-        MuiTextField: {
-            styleOverrides: {
-                root: {
-                    '& .MuiOutlinedInput-root': {
-                        borderRadius: '30px',  // Rounded input fields
-                    },
-                },
-            },
-        },
-        MuiCard: {
-            styleOverrides: {
-                root: {
-                    borderRadius: '8px',      // Rounded cards
-                    transition: 'transform 0.2s ease-in-out',
-                    '&:hover': {
-                        transform: 'translateY(-3px)',  // Slight lift on hover
+                        backgroundColor: 'rgba(245,197,24,0.08)',
                     },
                 },
             },
@@ -78,21 +78,42 @@ const imdbDarkTheme = createTheme({
         MuiChip: {
             styleOverrides: {
                 root: {
-                    fontWeight: 700,          // Bold text inside chips
+                    fontWeight: 700,
+                    backgroundColor: imdbGold,
+                    color: '#181818', // Black text on gold
+                    '&.MuiChip-outlined': {
+                        borderColor: imdbGold,
+                        color: imdbGold,
+                        backgroundColor: 'transparent',
+                    },
+                },
+            },
+        },
+        MuiCard: {
+            styleOverrides: {
+                root: {
+                    borderRadius: '12px',
+                    boxShadow: '0 2px 12px rgba(245, 197, 24, 0.10)',
+                    backgroundColor: '#232323',
+                    transition: 'box-shadow 0.2s, transform 0.2s',
+                    '&:hover': {
+                        boxShadow: '0 4px 20px rgba(245, 197, 24, 0.20)',
+                        transform: 'translateY(-4px) scale(1.02)',
+                        border: `1.5px solid ${imdbGold}`,
+                    },
                 },
             },
         },
         MuiCssBaseline: {
             styleOverrides: {
                 body: {
-                    // Custom scrollbar styling for dark theme
-                    scrollbarColor: "#f5c518 #1a1a1a",
+                    scrollbarColor: `${imdbGold} #181818`,
                     "&::-webkit-scrollbar, & *::-webkit-scrollbar": {
-                        backgroundColor: "#1a1a1a",
+                        backgroundColor: "#181818",
                         width: 8,
                     },
                     "&::-webkit-scrollbar-thumb, & *::-webkit-scrollbar-thumb": {
-                        backgroundColor: "#f5c518",
+                        backgroundColor: imdbGold,
                         borderRadius: 4,
                     },
                 },
@@ -101,44 +122,85 @@ const imdbDarkTheme = createTheme({
     },
 });
 
-// Define a custom light theme for the app
 const imdbLightTheme = createTheme({
     palette: {
-        mode: 'light',                     // Use light mode colors
+        mode: 'light',
         primary: {
-            main: '#000000',               // Main color for buttons and highlights
-            contrastText: '#ffffff',       // White text on black background
+            main: imdbGold,
+            contrastText: '#181818',
         },
         secondary: {
-            main: '#01b4e4',               // Light blue for accents
+            main: '#01b4e4',
         },
         background: {
-            default: '#ffffff',            // Page background (white)
-            paper: '#f5f5f5',              // Background for paper components
+            default: '#fff',
+            paper: '#fafafa',
         },
         text: {
-            primary: '#000000',            // Black text
-            secondary: '#404040',          // Dark gray for secondary text
+            primary: '#181818',
+            secondary: '#404040',
         },
+        divider: '#e0e0e0',
     },
-    // Reuse the same typography settings from the dark theme
     typography: { ...imdbDarkTheme.typography },
-
     components: {
-        // Reuse dark theme component styles but customize where needed
-        ...imdbDarkTheme.components,
         MuiButton: {
             styleOverrides: {
                 root: {
                     borderRadius: '20px',
                     padding: '8px 20px',
                     textTransform: 'none',
-                    '&.MuiButton-contained': {
-                        backgroundColor: '#01b4e4',   // Light blue background
-                        color: '#ffffff',             // White text
-                        '&:hover': {
-                            backgroundColor: '#0099c3', // Darker blue on hover
-                        },
+                    fontWeight: 700,
+                },
+                containedPrimary: {
+                    backgroundColor: imdbGold,
+                    color: '#181818', // Black text on gold
+                    '&:hover': {
+                        backgroundColor: '#ffe066',
+                        color: '#181818',
+                    },
+                },
+                outlinedPrimary: {
+                    borderColor: imdbGold,
+                    color: '#181818', // Black text for outlined buttons
+                    backgroundColor: 'transparent',
+                    '&:hover': {
+                        backgroundColor: 'rgba(245,197,24,0.08)',
+                    },
+                },
+                textPrimary: {
+                    color: '#181818', // Black text for text buttons
+                    '&:hover': {
+                        backgroundColor: 'rgba(245,197,24,0.08)',
+                    },
+                },
+            },
+        },
+        MuiChip: {
+            styleOverrides: {
+                root: {
+                    fontWeight: 700,
+                    backgroundColor: imdbGold,
+                    color: '#181818', // Black text on gold
+                    '&.MuiChip-outlined': {
+                        borderColor: imdbGold,
+                        color: '#181818',
+                        backgroundColor: 'transparent',
+                    },
+                },
+            },
+        },
+        MuiCard: {
+            styleOverrides: {
+                root: {
+                    borderRadius: '12px',
+                    boxShadow: '0 2px 12px rgba(245, 197, 24, 0.06)',
+                    backgroundColor: '#fafafa',
+                    transition: 'box-shadow 0.2s, transform 0.2s',
+                    '&:hover': {
+                        boxShadow: '0 4px 20px rgba(245, 197, 24, 0.13)',
+                        transform: 'translateY(-4px) scale(1.02)',
+                        border: `1.5px solid ${imdbGold}`,
                     },
                 },
             },
@@ -146,16 +208,18 @@ const imdbLightTheme = createTheme({
         MuiCssBaseline: {
             styleOverrides: {
                 body: {
-                    // Custom scrollbar styling for light theme
-                    scrollbarColor: "#01b4e4 #f5f5f5",
+                    scrollbarColor: "#01b4e4 #fafafa",
                     "&::-webkit-scrollbar, & *::-webkit-scrollbar": {
-                        backgroundColor: "#f5f5f5",
+                        backgroundColor: "#fafafa",
+                    },
+                    "&::-webkit-scrollbar-thumb, & *::-webkit-scrollbar-thumb": {
+                        backgroundColor: "#01b4e4",
+                        borderRadius: 4,
                     },
                 },
             },
         },
     },
 });
-
 
 export { imdbDarkTheme, imdbLightTheme };

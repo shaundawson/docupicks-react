@@ -177,16 +177,16 @@ export function useCachedDocs() {
                 const cacheTime = localStorage.getItem(CACHE_TIME_KEY);
                 const cacheAge = cacheTime ? Date.now() - parseInt(cacheTime) : null;
 
-                console.debug('[Cache Check]', {
-                    hasCache: !!cachedData,
-                    cacheAge: cacheAge ? `${Math.round(cacheAge / 1000)}s ago` : 'N/A',
-                    isValid: cacheAge ? cacheAge < CACHE_DURATION : false
-                });
+                // console.debug('[Cache Check]', {
+                //     hasCache: !!cachedData,
+                //     cacheAge: cacheAge ? `${Math.round(cacheAge / 1000)}s ago` : 'N/A',
+                //     isValid: cacheAge ? cacheAge < CACHE_DURATION : false
+                // });
 
                 if (cachedData && cacheTime && cacheAge < CACHE_DURATION) {
-                    console.debug('[Cache Load] Using cached data');
+                    // console.debug('[Cache Load] Using cached data');
                     const parsedData = JSON.parse(cachedData);
-                    console.debug(`[Cache Load] Parsed ${parsedData.length} items`);
+                    // console.debug(`[Cache Load] Parsed ${parsedData.length} items`);
                     setData(sortMoviesByRating(parsedData).slice(0, 40));
                     setLoading(false);
                     return;
@@ -255,7 +255,7 @@ export function useCachedDocs() {
                 handleError(err);
                 await attemptFallbackRecovery();
             } finally {
-                console.debug('[Loading State] Setting loading to false');
+                // console.debug('[Loading State] Setting loading to false');
                 setLoading(false);
             }
         };

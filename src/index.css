@@ -11,48 +11,9 @@ body {
   color: #f5c518 !important;
 }
 
-/* Custom scrollbar */
-::-webkit-scrollbar {
-  width: 8px;
-}
-
-::-webkit-scrollbar-track {
-  background: #1a1a1a;
-}
-
-::-webkit-scrollbar-thumb {
-  background: #f5c518;
-  border-radius: 4px;
-}
-
 /* IMDb-style alerts */
 .MuiAlert-standardError {
   background-color: #3a1d1d !important;
   border: 1px solid #5c2c2c;
 }
 
-/* Header styling */
-.MuiAppBar-root {
-  background-color: #000000 !important;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5) !important;
-}
-
-
-/* Dark Theme Button Override */
-button.MuiButtonBase-root.MuiButton-root.MuiButton-outlined.MuiButton-outlinedPrimary.MuiButton-sizeSmall.MuiButton-outlinedSizeSmall.MuiButton-colorPrimary.MuiButton-root.MuiButton-outlined.MuiButton-outlinedPrimary.MuiButton-sizeSmall.MuiButton-outlinedSizeSmall.MuiButton-colorPrimary.css-711gff-MuiButtonBase-root-MuiButton-root {
-  color: #f5c518ff !important;
-  border: solid;
-  border-width: 1px;
-}
-
-button.MuiButtonBase-root.MuiButton-root.MuiButton-outlined.MuiButton-outlinedPrimary.MuiButton-sizeMedium.MuiButton-outlinedSizeMedium.MuiButton-colorPrimary.MuiButton-root.MuiButton-outlined.MuiButton-outlinedPrimary.MuiButton-sizeMedium.MuiButton-outlinedSizeMedium.MuiButton-colorPrimary.css-17mh17-MuiButtonBase-root-MuiButton-root {
-  color: #f5c518;
-  border: solid;
-}
-
-/* Footer styling */
-footer {
-  background-color: #000 !important;
-  padding: 20px 0;
-  margin-top: auto;
-}
