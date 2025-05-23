@@ -10,7 +10,6 @@ const CACHE_KEY = 'docupicks-cache';
 const CACHE_TIME_KEY = `${CACHE_KEY}-time`;
 
 // OMDB API key from environment variable
-// const OMDB_API_KEY = process.env.VITE_OMDB_API_KEY;
 const OMDB_API_KEY = import.meta.env.VITE_OMDB_API_KEY;
 
 /**
@@ -49,6 +48,16 @@ export function useCachedDocs() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string>('');
 
+    // Helper function to sort movies by IMDb rating
+    const sortMoviesByRating = (movies: Movie[]): Movie[] => {
+        return [...movies].sort((a, b) => {
+            // Handle missing ratings and non-numeric values
+            const ratingA = parseFloat(a.imdbRating) || 0;
+            const ratingB = parseFloat(b.imdbRating) || 0;
+            return ratingB - ratingA; // Descending order (highest first)
+        });
+    };
+
     useEffect(() => {
         const fetchData = async () => {
             try {
@@ -67,7 +76,7 @@ export function useCachedDocs() {
                     console.debug('[Cache Load] Using cached data');
                     const parsedData = JSON.parse(cachedData);
                     console.debug(`[Cache Load] Parsed ${parsedData.length} items`);
-                    setData(parsedData);
+                    setData(sortMoviesByRating(parsedData));
                     setLoading(false);
                     return;
                 }
@@ -77,7 +86,7 @@ export function useCachedDocs() {
                 const freshData: Movie[] = await API.get('docupicksApi', '/cache', {});
                 console.debug('[API Response] Received data:', {
                     count: freshData.length,
-                    sample: freshData.slice(0, 3) // Log first 3 items for validation
+                    sample: freshData.slice(0, 3)
                 });
 
                 // Validate response structure
@@ -86,11 +95,12 @@ export function useCachedDocs() {
                     throw new Error('Invalid API response format');
                 }
 
-                // Save to cache
-                console.debug(`[Cache Update] Storing ${freshData.length} items`);
-                localStorage.setItem(CACHE_KEY, JSON.stringify(freshData));
+                // Sort and save to cache
+                const sortedData = sortMoviesByRating(freshData);
+                console.debug(`[Cache Update] Storing ${sortedData.length} items`);
+                localStorage.setItem(CACHE_KEY, JSON.stringify(sortedData));
                 localStorage.setItem(CACHE_TIME_KEY, Date.now().toString());
-                setData(freshData);
+                setData(sortedData);
                 console.debug('[API Success] Data updated from fresh API response');
             } catch (err) {
                 // If API fails, log and fall back to cache or static data
@@ -115,7 +125,7 @@ export function useCachedDocs() {
                     try {
                         const parsedData = JSON.parse(cachedData);
                         console.debug(`[Fallback] Using expired cache with ${parsedData.length} items`);
-                        setData(parsedData);
+                        setData(sortMoviesByRating(parsedData));
                     } catch (parseError) {
                         console.error('[Fallback] Cache parse failed:', parseError);
                         throw new Error('Corrupted cache data');
@@ -125,13 +135,11 @@ export function useCachedDocs() {
                     // Enrich fallback movies by fetching full details from OMDB
                     console.warn('[Fallback] No cache available, using static fallback with enrichment');
                     const enrichedFallbacks: Movie[] = [];
-                    for (const title of FALLBACK_MOVIES) {
-                        const movieDetails = await fetchMovieDetails(title);
-                        if (movieDetails) {
-                            enrichedFallbacks.push(movieDetails);
-                        } else {
-                            // If no details found, push minimal fallback with title only
-                            enrichedFallbacks.push({
+
+                    // Fetch all movie details in parallel
+                    const fetchPromises = FALLBACK_MOVIES.map(title =>
+                        fetchMovieDetails(title)
+                            .then(movieDetails => movieDetails || {
                                 Title: title,
                                 Year: '',
                                 Rated: '',
@@ -161,11 +169,17 @@ export function useCachedDocs() {
                                 Production: '',
                                 Website: '',
                                 Response: '',
-                            });
-                        }
-                    }
-                    console.debug(`[Fallback] Generated ${enrichedFallbacks.length} enriched fallback items`);
-                    setData(enrichedFallbacks);
+                            })
+                    );
+
+                    // Wait for all fetches to complete
+                    const fallbackResults = await Promise.all(fetchPromises);
+
+                    // Sort results by IMDb rating
+                    const sortedFallbacks = sortMoviesByRating(fallbackResults);
+
+                    console.debug(`[Fallback] Generated ${sortedFallbacks.length} enriched fallback items`);
+                    setData(sortedFallbacks);
                 }
             } catch (cacheErr) {
                 console.error('[Fallback] Recovery failed:', cacheErr);
@@ -192,7 +206,7 @@ export function useCachedDocs() {
     };
 
     return {
-        data: data.slice(0, 40), // Enforce max limit
+        data: data.slice(0, 40), // Enforce max limit after final sort
         loading,
         error
     };

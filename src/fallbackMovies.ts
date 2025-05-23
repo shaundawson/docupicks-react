@@ -21,7 +21,6 @@ export const FALLBACK_MOVIES = [
     'I Got a Monster',
     'MLK / FBI',
     'Hold Your Fire',
-    'The Prison in 12 Landscapes',
     'Whose Streets',
     'The Farm: Angola, USA',
     'The House I Live In',
@@ -31,6 +30,7 @@ export const FALLBACK_MOVIES = [
     'The Uncomfortable Truth',
     'Strong Island',
     'LA 92',
+    'Daughters',
     'Let It Fall: Los Angeles 1982 - 1992',
     'The Black Panthers: Vanguard Of The Revolution',
     'The Black Power Mixtape 1967-1975',
@@ -38,7 +38,6 @@ export const FALLBACK_MOVIES = [
     'Time: The Kalief Browder Story',
     'Survivors Guide to Prison',
     'Detroit Under S.T.R.E.S.S.',
-    'Betraying the Badge - Operation Broken Oath',
     '16 Shots',
     'O.J.: Made in America',
     'Truth Has Fallen',
@@ -50,13 +49,9 @@ export const FALLBACK_MOVIES = [
     'The Greatest Lie Ever Sold: George Floyd and the Rise of BLM',
     'Trial 4',
     'Do Not Resist',
-    'Power',
     'Say Her Name: The Life and Death of Sandra Bland',
     'The Murder of Fred Hampton',
     'Killing Them Safely',
     'Peace Officer',
-    'Riotsville, U.S.A.',
-    'Policing the Police',
-    'Ferguson: A Report from Occupied Territory',
-    'History of Police Brutality'
+    'Riotsville, U.S.A.'
 ] as const;
